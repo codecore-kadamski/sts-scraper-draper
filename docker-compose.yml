@@ -1,0 +1,49 @@
+version: '3.5'
+
+networks:
+  default_net:
+
+services:
+  db:
+    container_name: psqldb
+    image: postgres:9.6-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_USER=root
+      - POSTGRES_DB=stsscraper
+      - POSTGRES_HOST=psqldb
+      - PG_TRUST_LOCALNET=true
+    networks:
+      default_net:
+
+  # scrapper_domain:
+  #   container_name: scrapper_domain
+  #   image: scrapper_domain:latest
+  #   restart: always
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     args:
+  #       ENVIRON: prod
+  #   ports:
+  #     - "5000:5000"
+  #   volumes:
+  #     - ./:/app/
+  #   depends_on:
+  #     - db
+  #   command: gunicorn -c gunicorn_config wsgi --access-logfile -
+  #   environment:
+  #     - POSTGRES_PASSWORD=test
+  #     - POSTGRES_USER=root
+  #     - POSTGRES_DB=stsscraper
+  #     - POSTGRES_HOST=psqldb
+  #     - PG_TRUST_LOCALNET=true
+  #     - ENVIRON=prod
+  #   networks:
+  #     default_net:
+
+volumes:
+  front-media-volume:
+    external: true
