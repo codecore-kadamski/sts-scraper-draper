@@ -1,18 +1,23 @@
-# from sqlalchemy.ext.declarative import declarative_base
-# from sqlalchemy import Column, Integer, String, ForeignKey
+from typing import List
+from pydantic import BaseModel, Field, constr
+from pydantic.dataclasses import dataclass
+from objects import (
+    SportOrm,
+)
 
-# Base = declarative_base()
 
+@dataclass(config=SportOrm)
+class Sport(BaseModel):
+    id: int
+    sts_id: int = Field(title='sts id')
+    name: str = Field(title="Name of sport", max_length=100)
+    url: str = Field(max_length=400, title='url')
 
+    class Config:
+        orm_mode = True
 
-# class User(Base):
-#     __tablename__ = 'users'
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String)
-#     fullname = Column(String)
-#     nickname = Column(String)
-#     def __repr__(self):
-#        return "<User(name='%s', fullname='%s', nickname='%s')>" % (
-#                             self.name, self.fullname, self.nickname)
+    def __unicode__(self):
+        return '%s' % (self.name)
 
-from pydantic import BaseModel
+    def __str__(self):
+        return "%s" % self.name
