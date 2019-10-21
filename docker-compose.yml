@@ -1,0 +1,45 @@
+version: '3.7'
+
+networks:
+  default_net:
+
+volumes:
+  data:
+  data_mysql:
+
+services:
+  db:
+    container_name: psqldb
+    image: postgres:11.3-alpine
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=stsparser
+      - POSTGRES_USER=stsparser
+      - POSTGRES_DB=stsparser
+      - POSTGRES_HOST=127.0.0.1
+      - PG_TRUST_LOCALNET=true
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      default_net:
+
+  mysql:
+    container_name: mysqldb
+    image: mysql:5.6
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=stsparser
+      - MYSQL_PASS=stsparser
+      - MYSQL_USER=stsparser
+      - MYSQL_DATABASE=stsparser
+      - MYSQL_HOST=127.0.0.1
+    volumes:
+      - ./data_mysql:/var/lib/mysql
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      default_net:
