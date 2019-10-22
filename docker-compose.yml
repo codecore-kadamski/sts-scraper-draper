@@ -18,7 +18,7 @@ services:
       - POSTGRES_PASSWORD=stsparser
       - POSTGRES_USER=stsparser
       - POSTGRES_DB=stsparser
-      - POSTGRES_HOST=127.0.0.1
+      - POSTGRES_HOST=%
       - PG_TRUST_LOCALNET=true
     volumes:
       - ./data_pgsql:/var/lib/postgresql/data
