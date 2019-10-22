@@ -4,14 +4,14 @@ networks:
   default_net:
 
 volumes:
-  data:
+  data_pgsql:
   data_mysql:
 
 services:
   pgsql:
     container_name: pgsqldb
     image: postgres:11.3-alpine
-    restart: always
+    restart: on-failure:3
     ports:
       - "5432:5432"
     environment:
@@ -21,8 +21,8 @@ services:
       - POSTGRES_HOST=127.0.0.1
       - PG_TRUST_LOCALNET=true
     volumes:
-      - ./data:/var/lib/postgresql/data
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./data_pgsql:/var/lib/postgresql/data
+      - ./scripts/pgsql:/docker-entrypoint-initdb.d
     networks:
       default_net:
 
@@ -33,18 +33,17 @@ services:
     ports:
       - "3306:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=stsparser
-      - MYSQL_PASS=stsparser
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_PASSWORD=stsparser
       - MYSQL_USER=stsparser
       - MYSQL_DATABASE=stsparser
-      - MYSQL_HOST=127.0.0.1
+      - MYSQL_ROOT_HOST=%
+      - TZ=Europe/Warsaw
     #user: "1000:50"
     command: --innodb-flush-method=O_DSYNC --innodb-use-native-aio=0 --log_bin=ON --server-id=master-01 --innodb_buffer_pool_size=20M
     volumes:
       - ./data_mysql:/var/lib/mysql
-      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
-      #- ./mysqld_innodb.cnf:/etc/mysql/conf.d/mysqld_innodb.cnf
-      #- ./initdb:/docker-entrypoint-initdb.d/
+      - ./scripts/mysql:/docker-entrypoint-initdb.d
     networks:
       default_net:
     healthcheck:

@@ -51,7 +51,7 @@ start-redis:
 # start: start-redis start-db migrations init-users start-local-server ##  start local server
 
 start:  ##  start project in containers
-	@-docker-compose up --build -d
+	@-docker-compose up --build -d --force-recreate
 
 stop:  #  stop project
 	@-docker-compose stop
