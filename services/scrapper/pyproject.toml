@@ -13,6 +13,8 @@ sqlalchemy = "^1.3"
 pydantic = "^0.32.2"
 pip = "^19.3"
 aiomysql = "^0.0.20"
+ipdb = "^0.12.2"
+selenium = "^3.141"
 
 [tool.poetry.dev-dependencies]
 
