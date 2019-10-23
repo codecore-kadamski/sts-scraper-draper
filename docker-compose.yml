@@ -8,30 +8,51 @@ volumes:
   data_mysql:
 
 services:
-  pgsql:
-    container_name: pgsqldb
-    image: postgres:11.3-alpine
-    restart: on-failure:3
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_PASSWORD=stsparser
-      - POSTGRES_USER=stsparser
-      - POSTGRES_DB=stsparser
-      - POSTGRES_HOST=%
-      - PG_TRUST_LOCALNET=true
-    volumes:
-      - ./data_pgsql:/var/lib/postgresql/data
-      - ./scripts/pgsql:/docker-entrypoint-initdb.d
-    networks:
-      default_net:
+  # pgsql:
+  #   container_name: pgsqldb
+  #   image: postgres:11.3-alpine
+  #   restart: on-failure:3
+  #   ports:
+  #     - "5432:5432"
+  #   environment:
+  #     - POSTGRES_PASSWORD=stsparser
+  #     - POSTGRES_USER=stsparser
+  #     - POSTGRES_DB=stsparser
+  #     - POSTGRES_HOST=%
+  #     - PG_TRUST_LOCALNET=true
+  #   volumes:
+  #     - ./data_pgsql:/var/lib/postgresql/data
+  #     - ./scripts/pgsql:/docker-entrypoint-initdb.d
+  #   networks:
+  #     default_net:
 
-  mysql:
-    container_name: mysqldb
-    image: mysql:5.7.17
-    restart: always
-    ports:
-      - "3306:3306"
+  # mysql:
+  #   container_name: mysqldb
+  #   image: mysql:5.7.17
+  #   restart: always
+  #   ports:
+  #     - "3306:3306"
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=root
+  #     - MYSQL_PASSWORD=stsparser
+  #     - MYSQL_USER=stsparser
+  #     - MYSQL_DATABASE=stsparser
+  #     - MYSQL_ROOT_HOST=%
+  #     - TZ=Europe/Warsaw
+  #   #user: "1000:50"
+  #   command: --innodb-flush-method=O_DSYNC --innodb-use-native-aio=0 --log_bin=ON --server-id=master-01 --innodb_buffer_pool_size=20M
+  #   volumes:
+  #     - ./data_mysql:/var/lib/mysql
+  #     - ./scripts/mysql:/docker-entrypoint-initdb.d
+  #   networks:
+  #     default_net:
+  #   healthcheck:
+  #       test: "test -f /var/lib/mysql/loaded"
+
+  scrapper:
+    container_name: scrapper
+    image: scrapper:latest
+    #restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_PASSWORD=stsparser
@@ -40,11 +61,6 @@ services:
       - MYSQL_ROOT_HOST=%
       - TZ=Europe/Warsaw
     #user: "1000:50"
-    command: --innodb-flush-method=O_DSYNC --innodb-use-native-aio=0 --log_bin=ON --server-id=master-01 --innodb_buffer_pool_size=20M
-    volumes:
-      - ./data_mysql:/var/lib/mysql
-      - ./scripts/mysql:/docker-entrypoint-initdb.d
+    command: pypy3 ./services/scrapper/scrapper/engines.py
     networks:
       default_net:
-    healthcheck:
-        test: "test -f /var/lib/mysql/loaded"

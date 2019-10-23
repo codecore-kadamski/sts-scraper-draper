@@ -51,7 +51,7 @@ start-redis:
 # start: start-redis start-db migrations init-users start-local-server ##  start local server
 
 start:  ##  start project in containers
-	@-docker-compose up --build -d --force-recreate
+	@-docker-compose up --build --force-recreate --remove-orphans -t 60 -d
 
 stop:  #  stop project
 	@-docker-compose stop
@@ -88,3 +88,6 @@ docker-rmi:
 
 docker-rm:
 	@-docker rm $(docker ps -a -q)
+
+build:
+	@-docker build -t scrapper -f services/scrapper/Dockerfile services/scrapper/
