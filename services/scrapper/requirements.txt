@@ -1,7 +1,7 @@
 aiohttp==3.6.2
 aiomysql==0.0.20
 beautifulsoup4==4.8.1
-chromedriver-binary==78.0.3904.70.0
+#chromedriver-binary==78.0.3904.70.0
 dataclasses==0.6
 decorator==4.4.0
 dynaconf==2.2.0

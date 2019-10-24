@@ -61,6 +61,6 @@ services:
       - MYSQL_ROOT_HOST=%
       - TZ=Europe/Warsaw
     #user: "1000:50"
-    command: pypy3 ./services/scrapper/scrapper/engines.py
+    command: pypy3 ./scrapper/run.py
     networks:
       default_net:
