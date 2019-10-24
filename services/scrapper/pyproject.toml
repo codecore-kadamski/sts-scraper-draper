@@ -17,6 +17,7 @@ ipdb = "^0.12.2"
 selenium = "^3.141"
 chromedriver-binary = "^78.0"
 beautifulsoup4 = "^4.8"
+bs4 = "^0.0.1"
 
 [tool.poetry.dev-dependencies]
 

@@ -4,16 +4,16 @@ from provider import StsProvider
 
 
 def run_scrapper():
-    with closing(asyncio.get_event_loop()) as loop:
+    #with closing(asyncio.get_event_loop()) as loop:
 
         StsProvider().get_menu()
 
-        try:
-            loop.run_forever()
-        except KeyboardInterrupt:
-            pass
-        finally:
-            loop.close()
+        # try:
+        #     loop.run_forever()
+        # except KeyboardInterrupt:
+        #     pass
+        # finally:
+        #     loop.close()
 
 
 if __name__ == "__main__":
