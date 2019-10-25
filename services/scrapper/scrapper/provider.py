@@ -8,14 +8,17 @@ import re
 
 SOCCER_SPORT_CLASS = 'sport-1'
 CONTINENTS = ['Europa', 'Ameryka Płn.', 'Ameryka Płd.', 'Afryka', 'Azja', 'Oceania', 'Świat']
-FUNCTIONS = {
-    'Europa': ('get_europe', ['A-G', 'H-N', 'P-W'],),
-    'Ameryka Płn.': ('get_america_n', [],),
+SELECTORS = {
+    'Europa': ('get_europe', ["A - G", "H - N", "P - W", "Młodzieżowe"],),
+    'Ameryka Płn.': ('get_america_n', ["Wszystkie"],),
+    'Ameryka Płd.': ('get_america_s', ["Wszystkie"],),
+    'Afryka': ('get_africa', ["A - K", "M - S", "T - Z", "Młodzieżowe"],),
+    'Afryka': ('get_asia', ["A - I", "J - M", "O - W", "Z - Z", "Młodzieżowe"],),
+    'Oceania': ('get_oceania', ["Nowa Zelandia"],),
+    'Świat': ('get_glob', ["Międzynarodowe", "Międzynarodowe Klubów", "Międzynarodowe Młodzieżowe"],),
 }
-
 CLIENT_ID = 66
-
-BASE_URL = f"http://stats.betradar.com/s4/?clientid={CLIENT_ID}#" # 2_1,3_47,22_1,5_67233,9_summary
+BASE_URL = f"http://stats.betradar.com/s4/?clientid={CLIENT_ID}#"
 
 
 class StsProvider(object):
@@ -62,37 +65,34 @@ class StsProvider(object):
 
     def _get_elem(self, elem):
         url = elem.find("a").attrs.get('href', False) if hasattr(elem.find("a"), 'attrs') else False
-        #name = elem.find("a").getText().strip() if url else elem.getText().strip() if elem.getText() else False
         cssclass = elem.find("a").attrs.get('class', False)
         data = {'name': self._parse_name(elem), 'url': self._parse_url(url), 'class': cssclass}
-        #print(data)
         return data
 
     def get_menu(self):
         self.get_page(BASE_URL)
         self.soup = BeautifulSoup(self.html, features="html.parser")
-
-        soccers = self.soup.find('div', "topmenu").find("ul").find("li", "allsports").find("ul").find("li", SOCCER_SPORT_CLASS)
-        continents = soccers.find_all("li", "continent")
-        for continent in continents:
-            self.get_continent(continent)
-        # for elem in allsports:
-        #     if hasattr(elem, 'attrs') and elem.attrs.get('class') and SOCCER_SPORT_CLASS in elem.attrs.get('class'):
+        try:
+            soccers = self.soup.find('div', "topmenu").find("ul").find("li", "allsports").find("ul").find("li", SOCCER_SPORT_CLASS)
+        except AttributeError:
+            raise
+        else:
+            continents = soccers.find_all("li", "continent")
+            for continent in continents:
+                self.get_continent(continent)
 
     def get_continent(self, content):
         data = self._get_elem(content)
-        #print(data)
         if data.get('name') in CONTINENTS:
             try:
-                field_function_name = f"{FUNCTIONS.get(data.get('name'))[0]}"
+                field_function_name = f"{SELECTORS.get(data.get('name'))[0]}"
                 field_function = getattr(self, field_function_name, None)
                 if field_function and callable(field_function):
-                    field_function(content.find("ul"), data)
+                    field_function(content.find("ul"), data, SELECTORS.get(data.get('name'))[1])
             except TypeError:
                 pass
 
     def _update_menu(self, continent_obj, country_obj, league_obj):
-        #  self.menu[continent_obj['name']][country_obj['name']].append(league_obj)
         url = f"{BASE_URL}{country_obj.get('url', {}).get('part', '')},5_{league_obj.get('url', {}).get('seasonid', '')}"
         self.menu[continent_obj['name']].append({
             'continent': continent_obj['name'],
@@ -104,16 +104,12 @@ class StsProvider(object):
             'summary_url': f"{url},9_summary",
             'calendar_url': f"{url},9_fixtures,231_full,23_3",
         })
-        #http://stats.betradar.com/s4/gismo.php?&html=1&id=3675&language=pl&clientid=66&child=3&state=2_1%2C3_257%2C22_1%2C5_66665%2C9_summary&childnodeid=3929&callback=902fa95ac71e1765411ff41ecef02ee07873b463
-        #http://stats.betradar.com/s4/gismo.php?&html=1&id=3675&language=pl&clientid=66&child=3&state=2_1,3_257,22_1,5_66665,9_summary&childnodeid=3929&callback=902fa95ac71e1765411ff41ecef02ee07873b463
-        #http://stats.betradar.com/s4/gismo.php?&html=1&id=3675&language=pl&clientid=66&child=3&state=2_1,3_257,22_1,5_66665,9_summary&childnodeid=3929
 
     def get_leagues(self, continent_obj, country_obj, leagues):
         continent_name = continent_obj['name']
         country_name = country_obj['name']
         for elem in leagues.find_all("li"):
             league_obj = self._get_elem(elem)
-            #print(continent_name, country_name, league_obj)
             self._update_menu(continent_obj, country_obj, league_obj)
 
     def get_countries(self, continent_obj, countries):
@@ -123,14 +119,36 @@ class StsProvider(object):
             if elem.find("ul"):
                 self.get_leagues(continent_obj, country_obj, elem.find("ul"))
 
-    def get_europe(self, content, continent_obj):
+    def _parse_continent(self, content, continent_obj, selectors):
         continent_name = continent_obj['name']
         self.menu[continent_name] = []
         for elem in content.find_all("li", "floater"):
             data = self._get_elem(elem)
             data_class = data.get('class', [''])
             if data_class and 'arrow_right' in data_class:
-                if any(word in data['name'] for word in ["A - G", "H - N", "P - W", "Młodzieżowe"]):
+                if any(word in data['name'] for word in selectors):
                     self.get_countries(continent_obj, elem.find("ul"))
-        for team in self.menu['Europa']:
+        for team in self.menu[continent_name]:
             print(team['league'], team['calendar_url'])
+
+
+    def get_europe(self, content, continent_obj, selectors):
+        self._parse_continent(content, continent_obj, selectors)
+
+    def get_america_n(self, content, continent_obj, selectors):
+        self._parse_continent(content, continent_obj, selectors)
+
+    def get_america_s(self, content, continent_obj, selectors):
+        self._parse_continent(content, continent_obj, selectors)
+
+    def get_africa(self, content, continent_obj, selectors):
+        self._parse_continent(content, continent_obj, selectors)
+
+    def get_asia(self, content, continent_obj, selectors):
+        self._parse_continent(content, continent_obj, selectors)
+
+    def get_oceania(self, content, continent_obj, selectors):
+        self._parse_continent(content, continent_obj, selectors)
+
+    def get_glob(self, content, continent_obj, selectors):
+        self._parse_continent(content, continent_obj, selectors)
