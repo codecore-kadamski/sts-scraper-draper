@@ -1,0 +1,10 @@
+.git
+**/.venv
+**/dist
+**/*.egg-info
+**/__pycache__
+**/.python-version
+**/pip-wheel-metadata
+**/tests
+**/Makefile
+**/examples
