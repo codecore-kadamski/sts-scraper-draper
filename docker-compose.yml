@@ -26,33 +26,12 @@ services:
   #   networks:
   #     default_net:
 
-  # mysql:
-  #   container_name: mysqldb
-  #   image: mysql:5.7.17
-  #   restart: always
-  #   ports:
-  #     - "3306:3306"
-  #   environment:
-  #     - MYSQL_ROOT_PASSWORD=root
-  #     - MYSQL_PASSWORD=stsparser
-  #     - MYSQL_USER=stsparser
-  #     - MYSQL_DATABASE=stsparser
-  #     - MYSQL_ROOT_HOST=%
-  #     - TZ=Europe/Warsaw
-  #   #user: "1000:50"
-  #   command: --innodb-flush-method=O_DSYNC --innodb-use-native-aio=0 --log_bin=ON --server-id=master-01 --innodb_buffer_pool_size=20M
-  #   volumes:
-  #     - ./data_mysql:/var/lib/mysql
-  #     - ./scripts/mysql:/docker-entrypoint-initdb.d
-  #   networks:
-  #     default_net:
-  #   healthcheck:
-  #       test: "test -f /var/lib/mysql/loaded"
-
-  scrapper:
-    container_name: scrapper
-    image: scrapper:latest
-    #restart: always
+  mysql:
+    container_name: mysql
+    image: mysql:5.7.17
+    restart: always
+    ports:
+      - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=root
       - MYSQL_PASSWORD=stsparser
@@ -61,6 +40,104 @@ services:
       - MYSQL_ROOT_HOST=%
       - TZ=Europe/Warsaw
     #user: "1000:50"
-    command: pypy3 ./scrapper/run.py
+    command: --innodb-flush-method=O_DSYNC --innodb-use-native-aio=0 --log_bin=ON --server-id=master-01 --innodb_buffer_pool_size=20M
+    volumes:
+      - ./data_mysql:/var/lib/mysql
+      - ./scripts/mysql:/docker-entrypoint-initdb.d
+    networks:
+      default_net:
+    healthcheck:
+        test: "test -f /var/lib/mysql/loaded"
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      default_net:
+
+  rabbit:
+    container_name: rabbit
+    hostname: rabbit
+    image: rabbitmq:latest
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=pass
+    ports:
+        - "5672:5672"
+    networks:
+      default_net:
+
+  # scrapper:
+  #   container_name: scrapper
+  #   image: scrapper:latest
+  #   #restart: always
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=root
+  #     - MYSQL_PASSWORD=stsparser
+  #     - MYSQL_USER=stsparser
+  #     - MYSQL_DATABASE=stsparser
+  #     - MYSQL_ROOT_HOST=%
+  #     - TZ=Europe/Warsaw
+  #   #user: "1000:50"
+  #   command: pypy3 ./scrapper/run.py
+  #   depends_on:
+  #     - mysqldb
+  #   networks:
+  #     default_net:
+
+  # fetcher:
+  #   container_name: fetcher
+  #   image: fetcher:latest
+  #   # build:
+  #   #   context: .
+  #   #   dockerfile: ./services/fetcher/Dockerfile
+  #   volumes:
+  #     - .:/app
+  #   # links:
+  #   #   - rabbit
+  #   # depends_on:
+  #   #   - rabbit
+  #   #   - mysql
+  #   #   - fetcher-celery
+  #   restart: always
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=root
+  #     - MYSQL_PASSWORD=stsparser
+  #     - MYSQL_USER=stsparser
+  #     - MYSQL_DATABASE=stsparser
+  #     - MYSQL_ROOT_HOST=%
+  #     - TZ=Europe/Warsaw
+  #     - CELERY_LOGIN=admin
+  #     - CELERY_PASS=pass
+  #     - CELERY_HOST=celery
+  #     - CELERY_PORT=5672
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - REDIS_DB=0
+  #   command: whereis python # ./fetcher/run.py celery -A fetcher worker --concurrency=20 --loglevel=INFO
+  #   networks:
+  #     default_net:
+
+  fetcher-celery:
+    container_name: fetcher-celery
+    image: fetcher:latest
+    # build:
+    #   context: .
+    #   #dockerfile: ./services/fetcher/Dockerfile
+    volumes:
+      - .:/app
+    links:
+      - rabbit
+      - redis
+    depends_on:
+      # - rabbit
+      - redis
+      # - mysql
+    #restart: always
+    env_file:
+      - ./services/fetcher/.env
+    command: celery -A services.fetcher.fetcher.tasks worker --concurrency=20 --loglevel=INFO
     networks:
       default_net:

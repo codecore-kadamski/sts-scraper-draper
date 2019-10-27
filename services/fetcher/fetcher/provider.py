@@ -7,7 +7,7 @@ from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 #import chromedriver_binary
 import re
-from fetcher.tasks import 
+from fetcher.tasks import fetch_data
 
 
 logging.basicConfig(level=logging.INFO)
@@ -67,10 +67,11 @@ class BetRadarProvider(object):
         return data
 
     def fetch_menu(self):
-        for continent_name in CONTINENTS:
+        for continent_name in settings.CONTINENTS:
             for country in self.menu[continent_name]:
-                result = fetch_data.delay(country)
-                print 'Task result:', result
+                if country is not None:
+                    result = fetch_data.delay(country)
+                    print(f'Task result: {result}', )
 
     def parse_menu(self):
         html = get_page(settings.BETRADAR_URL)
@@ -86,7 +87,7 @@ class BetRadarProvider(object):
 
     def get_continent(self, content):
         data = self._get_elem(content)
-        if data.get('name') in CONTINENTS:
+        if data.get('name') in settings.CONTINENTS:
             try:
                 field_function_name = f"{settings.SELECTORS.get(data.get('name'))[0]}"
                 field_function = getattr(self, field_function_name, None)
@@ -96,7 +97,7 @@ class BetRadarProvider(object):
                 pass
 
     def _update_menu(self, continent_obj, country_obj, league_obj):
-        url = f"{BASE_URL}{country_obj.get('url', {}).get('part', '')},5_{league_obj.get('url', {}).get('seasonid', '')}"
+        url = f"{settings.BETRADAR_URL}{country_obj.get('url', {}).get('part', '')},5_{league_obj.get('url', {}).get('seasonid', '')}"
         self.menu[continent_obj['name']].append({
             'continent': continent_obj['name'],
             'continent_url': continent_obj['url'],

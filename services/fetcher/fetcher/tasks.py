@@ -1,5 +1,6 @@
-from __future__ import absolute_import
-from fetcher.celery import app
+from __future__ import absolute_import, unicode_literals
+from .celeryapp import app
+
 # import time,requests
 # from pymongo import MongoClient
 
@@ -10,7 +11,12 @@ from fetcher.celery import app
 # collection = db.celery_test
 # post = db.test
 
+# @app.task(bind=True, default_retry_delay=10)  # set a retry delay, 10 equal to 10s
+# def fetch_data(self, obj):
+#     if obj:
+#         print(obj['calendar_url'])
 
 @app.task(bind=True, default_retry_delay=10)  # set a retry delay, 10 equal to 10s
 def fetch_data(self, obj):
-    print(obj['calendar_url'])
+    if obj:
+        print(obj['calendar_url'])
