@@ -33,9 +33,8 @@ python = "^3.6"
 dynaconf = "^2.1"
 bs4 = "^0.0.1"
 selenium = "^3.141"
-celery = "^4.3"
 requests = "^2.22"
-redis = "^3.3"
+celery = "^4.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"

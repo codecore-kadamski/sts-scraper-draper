@@ -20,3 +20,8 @@ RUN poetry install -n `if [ "$DEVELOP" = "true" ]; then echo ''; else echo '--no
 COPY . /app
 
 RUN pip uninstall --yes poetry && rm pyproject.toml poetry.lock
+
+#ENTRYPOINT ["python"]
+
+#CMD cd /app && celery worker --app=fetcher.celery worker --concurrency=20, --loglevel=INFO]
+
