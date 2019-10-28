@@ -5,19 +5,34 @@ import os
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
-#import chromedriver_binary
+import chromedriver_binary
 import re
-from fetcher.tasks import fetch_data
+from app.tasks import fetch_data
 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+CHROMEDRIVER_FILE = 'chromedriver'
+
+PATH_DRIVER_DOCKER = PATH_DRIVER = '/drivers/'
+
+if os.path.isdir(PATH_DRIVER_DOCKER) is False:
+    PATH_DRIVER = os.path.dirname(os.path.abspath('../../drivers')) + PATH_DRIVER_DOCKER
+    if os.path.isdir(PATH_DRIVER) is False:
+        #raise ValueError("Brak path do chromedriver")
+        pass
+
+PATH_DRIVER = f"{PATH_DRIVER}{CHROMEDRIVER_FILE}"
+
+
 def get_page(url):
+    #import ipdb; ipdb.set_trace()
     #self.chromedriver = os.path.join(os.path.dirname(os.path.abspath('../../drivers')), 'drivers', 'chromedriver')
     #import ipdb; ipdb.set_trace()
     #self.chromedriver = os.path.join(os.path.dirname(__file__), 'chromedriver')
+
     options = webdriver.ChromeOptions()
     options.add_argument('--no-proxy-server')
     options.add_argument('--start-minimized')
@@ -25,7 +40,8 @@ def get_page(url):
     options.add_argument('--no-sandbox')
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
-    browser = webdriver.Chrome(options=options)
+    browser = webdriver.Chrome(executable_path=PATH_DRIVER, options=options)
+    #browser = webdriver.Chrome(PATH_DRIVER, options=options)
     browser.set_page_load_timeout(10)
     browser.get(url)
     html = browser.page_source
@@ -134,7 +150,6 @@ class BetRadarProvider(object):
                     self.get_countries(continent_obj, elem.find("ul"))
         for team in self.menu[continent_name]:
             print(team['league'], team['calendar_url'])
-
 
     def get_europe(self, content, continent_obj, selectors):
         self._parse_continent(content, continent_obj, selectors)

@@ -35,6 +35,10 @@ bs4 = "^0.0.1"
 selenium = "^3.141"
 requests = "^2.22"
 celery = "^4.3"
+redis = "^3.3"
+gunicorn = "^19.9"
+flower = "^0.9.3"
+chromedriver_binary = "^78.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"

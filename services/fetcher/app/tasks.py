@@ -1,5 +1,5 @@
 from __future__ import absolute_import, unicode_literals
-from fetcher.celeryapp import app
+from app.celeryapp import app
 
 # import time,requests
 # from pymongo import MongoClient

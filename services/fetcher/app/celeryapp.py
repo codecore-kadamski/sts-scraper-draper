@@ -8,15 +8,14 @@ app = Celery(
     # broker=settings.BROKER_URL,
     # broker=f'amqp://{settings.CELERY_LOGIN}:{settings.CELERY_PASS}@{settings.CELERY_HOST}:{settings.CELERY_PORT}',
     # backend='amqp://',
-    include=['fetcher.tasks']
+    include=['app.tasks']
 )
-app.config_from_object('fetcher.celeryconfig')
+app.config_from_object('app.celeryconfig')
 
 app.conf.update(
     result_expires=3600,
     CELERY_TASK_RESULT_EXPIRES=3600
 )
-#app.autodiscover_tasks()
 
 
 if __name__ == '__main__':
