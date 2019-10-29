@@ -69,7 +69,7 @@ services:
       # dockerfile: Dockerfile
     volumes: 
       - ./services/fetcher:/app
-      #- ./drivers:/drivers
+      - ./drivers:/drivers
     depends_on:
       # - rabbit
       - redis

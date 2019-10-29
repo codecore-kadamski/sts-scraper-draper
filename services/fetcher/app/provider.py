@@ -5,9 +5,9 @@ import os
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
-import chromedriver_binary
 import re
 from app.tasks import fetch_data
+import chromedriver_binary
 
 
 logging.basicConfig(level=logging.INFO)
@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 #chrome_bin = os.environ.get('CHROMEDRIVER_PATH', None)
 #options.binary_location = os.environ.get('CHROMEDRIVER_PATH', None)
 #browser = webdriver.Chrome(executable_path='chromedriver78', chrome_options=options)
+#  browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
 
 
 def get_page(url):

@@ -1,8 +1,6 @@
 FROM pypy:3.6-7.2.0-slim-stretch
 
-ENV PYTHONDONTWRITEBYTECODE=1
-
-RUN apt-get update && apt-get install --yes curl
+RUN apt-get update && apt-get install --yes curl vim
 
 # Install Chrome for Selenium
 RUN curl https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o /chrome.deb
@@ -13,16 +11,16 @@ RUN rm /chrome.deb
 RUN curl https://chromedriver.storage.googleapis.com/2.31/chromedriver_linux64.zip -o /usr/local/bin/chromedriver
 RUN chmod +x /usr/local/bin/chromedriver
 
-ENV PATH="/usr/local/bin/chromedriver:/devices:${PATH}"
-
 RUN pip install pip==19.2.3 poetry==0.12.17
 RUN poetry config settings.virtualenvs.create false
 
-ENV PYTHONPATH=/app
 ARG DEVELOP=false
 
 RUN mkdir -p /app
 WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONPATH=/app
 
 RUN ln -s /usr/local/bin/pypy3 /usr/local/bin/python
 

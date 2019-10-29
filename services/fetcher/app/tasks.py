@@ -20,3 +20,8 @@ from app.celeryapp import app
 def fetch_data(self, obj):
     if obj:
         print(obj['calendar_url'])
+
+
+@app.task(bind=True, default_retry_delay=10)
+def get_menu_from_betradar(urls):
+    

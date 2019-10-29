@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS `pages`;
-CREATE TABLE IF NOT EXISTS `pages` (
+DROP TABLE IF EXISTS `fetcher_pages`;
+CREATE TABLE IF NOT EXISTS `fetcher_pages` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `url` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     `html` TEXT,
