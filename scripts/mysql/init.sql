@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS `sports`;
 CREATE TABLE IF NOT EXISTS `sports` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `sts_id` INT NOT NULL,
@@ -9,6 +10,7 @@ CREATE TABLE IF NOT EXISTS `sports` (
 ) ENGINE=InnoDB;
 
 
+DROP TABLE IF EXISTS `statistics`;
 CREATE TABLE IF NOT EXISTS `statistics` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `sports_id` INT NOT NULL,

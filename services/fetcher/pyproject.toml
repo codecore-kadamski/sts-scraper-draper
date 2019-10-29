@@ -39,6 +39,7 @@ redis = "^3.3"
 gunicorn = "^19.9"
 flower = "^0.9.3"
 chromedriver_binary = "^78.0"
+wdb = "^3.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"

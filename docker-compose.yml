@@ -69,12 +69,12 @@ services:
       # dockerfile: Dockerfile
     volumes: 
       - ./services/fetcher:/app
-      - ./drivers:/drivers
+      #- ./drivers:/drivers
     depends_on:
       # - rabbit
       - redis
       - mysql
-    #restart: always
+    restart: always
     env_file:
       - ./conf/.env
     #command: gunicorn -b 0.0.0.0:8000 app:app
@@ -92,14 +92,14 @@ services:
     #   dockerfile: Dockerfile
     volumes: 
       - ./services/fetcher:/app
-      - ./drivers:/drivers
+    # - ./drivers:/drivers
     depends_on:
       # - rabbit
       - fetcher
       - redis
-      # - mysql
-    #restart: always
-    user: "1000:1000"
+      - mysql
+    restart: always
+    #user: "1000:1000"
     env_file:
       - ./conf/.env
     command: celery -A app.tasks worker --loglevel=info
@@ -115,3 +115,13 @@ services:
     depends_on:
       - fetcher
       - redis
+    networks:
+      default_net:
+
+  wdb:
+    container_name: wdb
+    image: kozea/wdb:latest
+    networks:
+      - default_net
+    ports:
+      - "1984:1984"

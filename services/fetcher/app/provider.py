@@ -14,25 +14,22 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-CHROMEDRIVER_FILE = 'chromedriver'
+# CHROMEDRIVER_FILE = 'chromedriver78'
+# PATH_DRIVER_DOCKER = PATH_DRIVER = '/drivers/'
+# if os.path.isdir(PATH_DRIVER_DOCKER) is False:
+#     PATH_DRIVER = os.path.dirname(os.path.abspath('../../drivers')) + PATH_DRIVER_DOCKER
+#     if os.path.isdir(PATH_DRIVER) is False:
+#         raise ValueError("Brak path do chromedriver")
+# PATH_DRIVER = f"{PATH_DRIVER}{CHROMEDRIVER_FILE}"
 
-PATH_DRIVER_DOCKER = PATH_DRIVER = '/drivers/'
-
-if os.path.isdir(PATH_DRIVER_DOCKER) is False:
-    PATH_DRIVER = os.path.dirname(os.path.abspath('../../drivers')) + PATH_DRIVER_DOCKER
-    if os.path.isdir(PATH_DRIVER) is False:
-        #raise ValueError("Brak path do chromedriver")
-        pass
-
-PATH_DRIVER = f"{PATH_DRIVER}{CHROMEDRIVER_FILE}"
+#self.chromedriver = os.path.join(os.path.dirname(os.path.abspath('../../drivers')), 'drivers', 'chromedriver')
+#self.chromedriver = os.path.join(os.path.dirname(__file__), 'chromedriver')
+#chrome_bin = os.environ.get('CHROMEDRIVER_PATH', None)
+#options.binary_location = os.environ.get('CHROMEDRIVER_PATH', None)
+#browser = webdriver.Chrome(executable_path='chromedriver78', chrome_options=options)
 
 
 def get_page(url):
-    #import ipdb; ipdb.set_trace()
-    #self.chromedriver = os.path.join(os.path.dirname(os.path.abspath('../../drivers')), 'drivers', 'chromedriver')
-    #import ipdb; ipdb.set_trace()
-    #self.chromedriver = os.path.join(os.path.dirname(__file__), 'chromedriver')
-
     options = webdriver.ChromeOptions()
     options.add_argument('--no-proxy-server')
     options.add_argument('--start-minimized')
@@ -40,8 +37,8 @@ def get_page(url):
     options.add_argument('--no-sandbox')
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
-    browser = webdriver.Chrome(executable_path=PATH_DRIVER, options=options)
-    #browser = webdriver.Chrome(PATH_DRIVER, options=options)
+    browser = webdriver.Chrome(chrome_options=options)
+    browser.implicitly_wait(25)
     browser.set_page_load_timeout(10)
     browser.get(url)
     html = browser.page_source
@@ -148,8 +145,8 @@ class BetRadarProvider(object):
             if data_class and 'arrow_right' in data_class:
                 if any(word in data['name'] for word in selectors):
                     self.get_countries(continent_obj, elem.find("ul"))
-        for team in self.menu[continent_name]:
-            print(team['league'], team['calendar_url'])
+        # for team in self.menu[continent_name]:
+        #     print(team['league'], team['calendar_url'])
 
     def get_europe(self, content, continent_obj, selectors):
         self._parse_continent(content, continent_obj, selectors)
