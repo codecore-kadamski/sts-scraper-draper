@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS `fetcher_menu`;
 CREATE TABLE IF NOT EXISTS `fetcher_menu` (
     `id` INT NOT NULL AUTO_INCREMENT,
-    `sport_id` INT DEFAULT NULL,
+    `sport` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
     `json` TEXT,
     `continent` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     `continent_url` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,

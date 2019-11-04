@@ -42,6 +42,7 @@ wdb = "^3.3"
 chromedriver_binary = "^78.0"
 pydantic = "^1.0"
 sqlalchemy = "^1.3"
+pyMySQL = "^0.9.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"

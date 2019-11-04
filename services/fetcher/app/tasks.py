@@ -23,5 +23,25 @@ def fetch_data(self, obj):
 
 
 @app.task(bind=True, default_retry_delay=10)
-def get_menu_from_betradar(urls):
-    
+def get_menu_soccer_from_betradar(urls):
+    pass
+
+# {
+#     'continent': 'Europa',
+#     'continent_url':
+#     {
+#         'part': '2_1,22_1'
+#     },
+#     'country': 'Wyspy Owcze',
+#     'country_url':
+#     {
+#         'part': '2_1,3_201,22_1'
+#     },
+#     'league': 'Logmanssteypid',
+#     'league_url':
+#     {
+#         'seasonid': '66655'
+#     },
+#     'summary_url': 'http://stats.betradar.com/s4/?clientid=66#2_1,3_201,22_1,5_66655,9_summary',
+#     'calendar_url': 'http://stats.betradar.com/s4/?clientid=66#2_1,3_201,22_1,5_66655,9_fixtures,231_full,23_3'
+# }
