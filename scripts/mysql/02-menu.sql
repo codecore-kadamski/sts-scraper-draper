@@ -2,7 +2,6 @@ DROP TABLE IF EXISTS `fetcher_menu`;
 CREATE TABLE IF NOT EXISTS `fetcher_menu` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `sport` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
-    `json` TEXT,
     `continent` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     `continent_url` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     `country` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
@@ -13,5 +12,6 @@ CREATE TABLE IF NOT EXISTS `fetcher_menu` (
     `calendar_url` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
     `sys_created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     `sys_modified` TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    CONSTRAINT UC_summary UNIQUE (id,summary_url)
 ) ENGINE=InnoDB;

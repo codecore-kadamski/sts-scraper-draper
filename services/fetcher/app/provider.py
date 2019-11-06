@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 import re
-from app.tasks import fetch_data
+from app.tasks import get_menu_soccer_from_betradar
 import chromedriver_binary
 
 
@@ -80,12 +80,13 @@ class BetRadarProvider(object):
         data = {'name': self._parse_name(elem), 'url': self._parse_url(url), 'class': cssclass}
         return data
 
-    def fetch_menu(self):
+    def fetch_menu_soccer(self):
         for continent_name in settings.CONTINENTS:
-            for country in self.menu[continent_name]:
-                if country is not None:
-                    result = fetch_data.delay(country)
-                    print(f'Task result: {result}', )
+            for part_menu_data in self.menu[continent_name]:
+                if part_menu_data is not None:
+                    result = get_menu_soccer_from_betradar.delay(part_menu_data)
+                    #  result = get_menu_soccer_from_betradar(part_menu_data)
+                    print(f'Task result: {result.id}', )
 
     def parse_menu(self):
         html = get_page(settings.BETRADAR_URL)
@@ -103,22 +104,28 @@ class BetRadarProvider(object):
         data = self._get_elem(content)
         if data.get('name') in settings.CONTINENTS:
             try:
-                field_function_name = f"{settings.SELECTORS.get(data.get('name'))[0]}"
+                field_function_name = f"{settings.SOCCER.get(data.get('name'))[0]}"
                 field_function = getattr(self, field_function_name, None)
                 if field_function and callable(field_function):
-                    field_function(content.find("ul"), data, settings.SELECTORS.get(data.get('name'))[1])
+                    field_function(content.find("ul"), data, settings.SOCCER.get(data.get('name'))[1])
             except TypeError:
                 pass
 
     def _update_menu(self, continent_obj, country_obj, league_obj):
+        """
+        league_obj: {'name': 'Tercera Division, Playoffs', 'url': {'seasonid': '66615'}, 'class': False}
+        """
         url = f"{settings.BETRADAR_URL}{country_obj.get('url', {}).get('part', '')},5_{league_obj.get('url', {}).get('seasonid', '')}"
+        url_continent = f"{settings.BETRADAR_URL}{continent_obj.get('url', {}).get('part', {})}"
+        url_country = f"{settings.BETRADAR_URL}{country_obj.get('url', {}).get('part', {})}"
+        url_league = f"{settings.BETRADAR_URL}{league_obj.get('url', {}).get('seasonid', {})}"
         self.menu[continent_obj['name']].append({
             'continent': continent_obj['name'],
-            'continent_url': continent_obj['url'],
+            'continent_url': url_continent,
             'country': country_obj['name'],
-            'country_url': country_obj['url'],
+            'country_url': url_country,
             'league': league_obj['name'],
-            'league_url': league_obj['url'],
+            'league_url': url_league,
             'summary_url': f"{url},9_summary",
             'calendar_url': f"{url},9_fixtures,231_full,23_3",
         })
