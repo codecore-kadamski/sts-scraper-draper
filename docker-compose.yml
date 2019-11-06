@@ -2,30 +2,73 @@ version: '3.7'
 
 services:
 
-  # pgsql:
-  #   container_name: psql
-  #   image: postgres:11.3-alpine
-  #   restart: on-failure:3
-  #   ports:
-  #     - "5432:5432"
-  #   env_file:
-  #     - ./conf/.env
-  #   volumes:
-  #     - ./data_pgsql:/var/lib/postgresql/data
-  #     - ./scripts/pgsql:/docker-entrypoint-initdb.d
-  #   networks:
-  #     default_net:
+  build:
+    build:
+      context: ./services/scrapper
+      dockerfile: Dockerfile
+    image: scrapper
+    env_file:
+      - ./conf/.env
+    networks:
+      default_net:
 
-  # rabbit:
-  #   container_name: rabbit
-  #   hostname: rabbit
-  #   image: rabbitmq:latest
-  #   env_file:
-  #     - ./conf/.env
-  #   ports:
-  #       - "5672:5672"
-  #   networks:
-  #     default_net:
+  base: &base
+    image: scrapper:latest
+    restart: always
+    volumes: 
+      - ./services/scrapper:/app
+      - ./drivers:/drivers
+    depends_on:
+      - mysql
+      - build
+      - redis
+      - wdb
+      - chromedriver
+
+  chromedriver:
+    container_name: chromedriver
+    image: blueimp/chromedriver:latest
+    restart: always
+    ports:
+      - "4444:4444"
+    env_file:
+      - ./conf/.env
+    networks:
+      default_net:
+        ipv4_address: 172.23.0.9
+
+  flower:
+    container_name: flower
+    image: scrapper:latest
+    ports:
+      - 5555:5555
+    command:  flower -A app.tasks --port=5555 --broker=redis://redis:6379/0
+    depends_on:
+      - scrapper
+      - redis
+    networks:
+      default_net:
+        ipv4_address: 172.23.0.5
+
+  wdb:
+    container_name: wdb
+    image: kozea/wdb:latest
+    ports:
+      - "1984:1984"
+    networks:
+      default_net:
+        ipv4_address: 172.23.0.3
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+    env_file:
+      - ./conf/.env
+    ports:
+      - "6379:6379"
+    networks:
+      default_net:
+        ipv4_address: 172.23.0.4
 
   mysql:
     container_name: mysql
@@ -42,89 +85,34 @@ services:
     networks:
       default_net:
         ipv4_address: 172.23.0.2
-
     healthcheck:
       test: "test -f /var/lib/mysql/loaded"
 
-  redis:
-    container_name: redis
-    image: redis:alpine
-    env_file:
-      - ./conf/.env
+  scrapper:
+    <<: *base
+    container_name: scrapper
     ports:
-      - "6379:6379"
-    networks:
-      default_net:
-        ipv4_address: 172.23.0.3
-
-  fetcher:
-    container_name: fetcher
-    image: fetcher:latest
-    #build: ./services/fetcher
-      # context: ./app
-      # dockerfile: Dockerfile
-    volumes: 
-      - ./services/fetcher:/app
-      - ./drivers:/drivers
-    depends_on:
-      # - rabbit
-      - redis
-      - mysql
-      - celery
-    restart: always
-    env_file:
-      - ./conf/.env
-    #command: gunicorn -b 0.0.0.0:8000 app:app
+      - "8000:8000"
     command: python app/run.py
-    ports:
-      - 8000:8000
-    networks:
-      default_net:
-        ipv4_address: 172.23.0.4
-
-  celery:
-    container_name: celery
-    image: fetcher:latest
-    # build:
-    #   context: ./services/fetcher/
-    #   dockerfile: Dockerfile
-    volumes: 
-      - ./services/fetcher:/app
-    # - ./drivers:/drivers
-    depends_on:
-      # - rabbit
-      - redis
-      - mysql
-    restart: always
-    #user: "1000:1000"
-    env_file:
-      - ./conf/.env
-    command: celery -A app.tasks worker --loglevel=info
-    networks:
-      default_net:
-        ipv4_address: 172.23.0.5
-
-  flower:
-    container_name: flower
-    image: fetcher
-    ports:
-      - 5555:5555
-    command:  flower -A app.tasks --port=5555 --broker=redis://redis:6379/0
-    depends_on:
-      - fetcher
-      - redis
     networks:
       default_net:
         ipv4_address: 172.23.0.6
 
-  wdb:
-    container_name: wdb
-    image: kozea/wdb:latest
-    ports:
-      - "1984:1984"
+  celery:
+    <<: *base
+    container_name: celery
+    command: celery -A app.tasks worker --loglevel=info
     networks:
       default_net:
         ipv4_address: 172.23.0.7
+
+  beat:
+    <<: *base
+    container_name: beat
+    command: celery beat -A app --schedule=/tmp/celerybeat-schedule --loglevel=info
+    networks:
+      default_net:
+        ipv4_address: 172.23.0.8
 
 networks:
   default_net:

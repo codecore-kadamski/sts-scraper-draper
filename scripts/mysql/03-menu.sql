@@ -1,5 +1,6 @@
-DROP TABLE IF EXISTS `fetcher_menu`;
-CREATE TABLE IF NOT EXISTS `fetcher_menu` (
+USE `stsparser`;
+DROP TABLE IF EXISTS `menu`;
+CREATE TABLE IF NOT EXISTS `menu` (
     `id` INT NOT NULL AUTO_INCREMENT,
     `sport` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
     `continent` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,

@@ -1,4 +1,4 @@
-from provider import BetRadarProvider
+from provider import BetRadarMenuProvider
 import asyncio
 import logging
 from contextlib import closing
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def run_fetcher():
     with closing(asyncio.get_event_loop()) as loop:
         logger.info(f"Parse menu STS ")
-        BetRadarProvider().fetch_menu_soccer()
+        BetRadarMenuProvider().fetch_menu_soccer()
         try:
             loop.run_forever()
         except KeyboardInterrupt:

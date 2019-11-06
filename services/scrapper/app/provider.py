@@ -7,7 +7,7 @@ from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 import re
 from app.tasks import get_menu_soccer_from_betradar
-import chromedriver_binary
+#import chromedriver_binary
 
 
 logging.basicConfig(level=logging.INFO)
@@ -47,7 +47,7 @@ def get_page(url):
     return html
 
 
-class BetRadarProvider(object):
+class BetRadarMenuProvider(object):
     menu = {}
     soup = None
 

@@ -1,0 +1,12 @@
+-- DROP TABLE IF EXISTS `fetcher_pages`;
+-- CREATE TABLE IF NOT EXISTS `fetcher_pages` (
+--     `id` INT NOT NULL AUTO_INCREMENT,
+--     `url` VARCHAR(400) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+--     `html` TEXT,
+--     `is_parsed` TINYINT NOT NULL DEFAULT '0',
+--     `created_date` DATETIME DEFAULT NULL,
+--     `pub_date` DATETIME DEFAULT NULL,
+--     `sys_created` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     `sys_modified` TIMESTAMP DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
+--     PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB;

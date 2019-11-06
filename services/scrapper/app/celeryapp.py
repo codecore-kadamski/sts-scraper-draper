@@ -12,10 +12,10 @@ app = Celery(
 )
 app.config_from_object('app.celeryconfig')
 
-app.conf.update(
-    result_expires=3600,
-    CELERY_TASK_RESULT_EXPIRES=3600
-)
+# app.conf.update(
+#     result_expires=3600,
+#     CELERY_TASK_RESULT_EXPIRES=3600
+# )
 
 
 if __name__ == '__main__':

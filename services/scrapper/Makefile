@@ -2,7 +2,7 @@ SHELL := /bin/bash
 PWD := $(shell pwd)
 WORKON_HOME := "$(dirname $(poetry run which python))"
 APP_PATH := $(PWD)
-APP := fetcher
+APP := scrapper
 
 RED := \u001b[0;31m
 NC := \u001b[0m
@@ -26,7 +26,7 @@ for line in sys.stdin:
 endef
 export PRINT_HELP_PYSCRIPT
 
-export DRIVERS_PATH := $(subst services/fetcher,drivers,$(APP_PATH))
+export DRIVERS_PATH := $(subst services/scrapper,drivers,$(APP_PATH))
 
 help:
 	@-python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
@@ -35,10 +35,10 @@ test:  ##  uruchamia testy unitest
 	@-poetry run python -m unittest
 
 run:  ##  run poetry
-	@-poetry run python fetcher/run.py 2>&1 /dev/null || true
+	@-poetry run python scrapper/run.py 2>&1 /dev/null || true
 
 runs:  ##  runs poetry
-	@-poetry run python fetcher/run_sync.py
+	@-poetry run python scrapper/run_sync.py
 
 clear:
 	@-find . -name "__pycache__" -exec rm -rf {} \; 2>/dev/null || true
