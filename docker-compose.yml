@@ -1,93 +1,12 @@
 version: '3.7'
 
 services:
-
-#  build:
-#    build:
-#      context: ./services/scrapper
-#      dockerfile: Dockerfile
-#    image: scrapper
-#    env_file:
-#      - ./conf/.env
-#    networks:
-#      default_net:
-
-  base: &base
-    image: scrapper:latest
-    restart: always
-    volumes: 
-      - ./services/scrapper:/app
-      #- ./drivers:/drivers
-    depends_on:
-      - mysql
-#      - build
-#      - redis
-#      - wdb
-      - chromedriver
-
-#  chromedriver:
-#    container_name: chromedriver
-#    image: blueimp/chromedriver:latest
-#    restart: always
-#    ports:
-#      - "4444:4444"
-#    env_file:
-#      - ./conf/.env
-#    networks:
-#      default_net:
-#        ipv4_address: 172.23.0.9
-
-  chromedriver:
-    container_name: chromedriver
-    image: chromedriver:latest
-    restart: always
-    ports:
-      - "4444:4444"
-    env_file:
-      - ./conf/.env
-    networks:
-      default_net:
-        ipv4_address: 172.23.0.9
-
-  flower:
-    container_name: flower
-    image: scrapper:latest
-    ports:
-      - 5555:5555
-    command:  flower -A app.tasks --port=5555 --broker=redis://redis:6379/0
-    depends_on:
-      - scrapper
-      - redis
-    networks:
-      default_net:
-        ipv4_address: 172.23.0.5
-
-#  wdb:
-#    container_name: wdb
-#    image: kozea/wdb:latest
-#    ports:
-#      - "1984:1984"
-#    networks:
-#      default_net:
-#        ipv4_address: 172.23.0.3
-
-  redis:
-    container_name: redis
-    image: redis:alpine
-    env_file:
-      - ./conf/.env
-    ports:
-      - "6379:6379"
-    networks:
-      default_net:
-        ipv4_address: 172.23.0.4
-
   mysql:
     container_name: mysql
     image: mysql:5.7.17
     restart: always
     ports:
-      - "3306:3306"
+      - 3306:3306
     env_file:
       - ./conf/.env
     command: --innodb-flush-method=O_DSYNC --innodb-use-native-aio=0 --log_bin=ON --server-id=master-01 --innodb_buffer_pool_size=20M
@@ -100,15 +19,87 @@ services:
     healthcheck:
       test: "test -f /var/lib/mysql/loaded"
 
+  chromedriver:
+    build:
+      context: ./services/chromedriver
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - ./conf/.env
+    environment:
+      - DEVELOP=true
+    container_name: chromedriver
+    #  image: chromedriver:latest
+    ports:
+      - 4444:4444
+    networks:
+      default_net:
+        ipv4_address: 172.23.0.10
+
+  wdb:
+    container_name: wdb
+    #image: kozea/wdb:latest
+    image: yajo/wdb-server:latest
+    ports:
+      - "1984:1984"
+    networks:
+      default_net:
+        ipv4_address: 172.23.0.11
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+    env_file:
+      - ./conf/.env
+    ports:
+      - 6379:6379
+    networks:
+      default_net:
+        ipv4_address: 172.23.0.12
+
+  build:
+#    build:
+#      context: ./services/scrapper
+#      dockerfile: Dockerfile
+    #      args:
+    #        DEVELOP: 'true'
+    image: scrapper:latest
+    env_file:
+      - ./conf/.env
+
+  base: &base
+    image: scrapper:latest
+    restart: always
+    volumes:
+      - ./services/scrapper:/app
+    env_file:
+      - ./conf/.env
+    depends_on:
+      - mysql
+      - build
+      - redis
+      - wdb
+      - chromedriver
+
   scrapper:
     <<: *base
     container_name: scrapper
     ports:
-      - "8000:8000"
+      - 8000:8000
     command: python app/run.py
     networks:
       default_net:
-        ipv4_address: 172.23.0.6
+        ipv4_address: 172.23.0.14
+
+  flower:
+    <<: *base
+    container_name: flower
+    ports:
+      - 5555:5555
+    command:  flower -A app.tasks --port=5555 --broker=redis://redis:6379/0
+    networks:
+      default_net:
+        ipv4_address: 172.23.0.15
 
   celery:
     <<: *base
@@ -116,7 +107,7 @@ services:
     command: celery -A app.tasks worker --loglevel=info
     networks:
       default_net:
-        ipv4_address: 172.23.0.7
+        ipv4_address: 172.23.0.16
 
   beat:
     <<: *base
@@ -124,7 +115,7 @@ services:
     command: celery beat -A app --schedule=/tmp/celerybeat-schedule --loglevel=info
     networks:
       default_net:
-        ipv4_address: 172.23.0.8
+        ipv4_address: 172.23.0.17
 
 networks:
   default_net:

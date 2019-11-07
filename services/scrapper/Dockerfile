@@ -3,8 +3,7 @@ FROM pypy:3.6-7.2.0-slim-stretch
 RUN pip install pip==19.2.3 poetry==0.12.17
 RUN poetry config settings.virtualenvs.create false
 
-ARG DEVELOP=false
-ARG ENV_MODE=dev
+ARG DEVELOP=true
 
 RUN mkdir -p /app
 WORKDIR /app

@@ -1,6 +1,5 @@
 import logging
 import re
-from typing import Dict
 
 from app.tasks import get_menu_soccer_from_betradar
 from bs4 import BeautifulSoup
@@ -45,7 +44,7 @@ def get_page_chromedriver(url):
     return html
 
 
-class BetRadarMenuSrapper(object):
+class BetRadarMenuScrapper(object):
     soup = None
 
     def __init__(self):
