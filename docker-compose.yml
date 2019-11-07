@@ -2,32 +2,44 @@ version: '3.7'
 
 services:
 
-  build:
-    build:
-      context: ./services/scrapper
-      dockerfile: Dockerfile
-    image: scrapper
-    env_file:
-      - ./conf/.env
-    networks:
-      default_net:
+#  build:
+#    build:
+#      context: ./services/scrapper
+#      dockerfile: Dockerfile
+#    image: scrapper
+#    env_file:
+#      - ./conf/.env
+#    networks:
+#      default_net:
 
   base: &base
     image: scrapper:latest
     restart: always
     volumes: 
       - ./services/scrapper:/app
-      - ./drivers:/drivers
+      #- ./drivers:/drivers
     depends_on:
       - mysql
-      - build
-      - redis
-      - wdb
+#      - build
+#      - redis
+#      - wdb
       - chromedriver
+
+#  chromedriver:
+#    container_name: chromedriver
+#    image: blueimp/chromedriver:latest
+#    restart: always
+#    ports:
+#      - "4444:4444"
+#    env_file:
+#      - ./conf/.env
+#    networks:
+#      default_net:
+#        ipv4_address: 172.23.0.9
 
   chromedriver:
     container_name: chromedriver
-    image: blueimp/chromedriver:latest
+    image: chromedriver:latest
     restart: always
     ports:
       - "4444:4444"
@@ -50,14 +62,14 @@ services:
       default_net:
         ipv4_address: 172.23.0.5
 
-  wdb:
-    container_name: wdb
-    image: kozea/wdb:latest
-    ports:
-      - "1984:1984"
-    networks:
-      default_net:
-        ipv4_address: 172.23.0.3
+#  wdb:
+#    container_name: wdb
+#    image: kozea/wdb:latest
+#    ports:
+#      - "1984:1984"
+#    networks:
+#      default_net:
+#        ipv4_address: 172.23.0.3
 
   redis:
     container_name: redis

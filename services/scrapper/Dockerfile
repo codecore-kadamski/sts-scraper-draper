@@ -16,7 +16,7 @@ RUN ln -s /usr/local/bin/pypy3 /usr/local/bin/python
 
 COPY ./pyproject.toml /app
 
-RUN poetry install -n # `if [ "$DEVELOP" = "true" ]; then echo ''; else echo '--no-dev'; fi`
+RUN poetry install -n `if [ "$DEVELOP" = "true" ]; then echo ''; else echo '--no-dev'; fi`
 
 COPY . /app
 
