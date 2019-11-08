@@ -23,7 +23,7 @@ use_parentheses = true
 line_length=128
 
 [tool.poetry]
-name = "fetcher"
+name = "scrapper"
 version = "0.1.0"
 description = ""
 authors = ["kadam <kadam@softserveinc.com>"]

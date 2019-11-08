@@ -5,18 +5,18 @@ RUN poetry config settings.virtualenvs.create false
 
 ARG DEVELOP=true
 
-RUN mkdir -p /app
-WORKDIR /app
+RUN mkdir -p /scrapper
+WORKDIR /scrapper
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED 1
-ENV PYTHONPATH=/app
+ENV PYTHONPATH=/scrapper
 
 RUN ln -s /usr/local/bin/pypy3 /usr/local/bin/python
 
-COPY ./pyproject.toml /app
+COPY ./pyproject.toml /scrapper
 
 RUN poetry install -n `if [ "$DEVELOP" = "true" ]; then echo ''; else echo '--no-dev'; fi`
 
-COPY . /app
+COPY . /scrapper
 
 RUN pip uninstall --yes poetry && rm pyproject.toml poetry.lock

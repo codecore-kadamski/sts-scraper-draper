@@ -1,50 +1,16 @@
 import logging
 import re
 
-from app.tasks import get_menu_soccer_from_betradar
 from bs4 import BeautifulSoup
 from dynaconf import settings
-from selenium import webdriver
+from scrapper.tasks import get_menu_soccer_from_betradar
+from scrapper.utils import get_page_chromedriver
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def get_page(url):
-    options = webdriver.ChromeOptions()
-    options.add_argument("--no-proxy-server")
-    options.add_argument("--start-minimized")
-    options.add_argument("--disable-cache")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    browser = webdriver.Chrome(chrome_options=options)
-    browser.implicitly_wait(25)
-    browser.set_page_load_timeout(10)
-    browser.get(url)
-    html = browser.page_source
-    browser.quit()
-    return html
-
-
-def get_page_chromedriver(url):
-    options = webdriver.ChromeOptions()
-    options.add_argument("--no-proxy-server")
-    options.add_argument("--start-minimized")
-    options.add_argument("--disable-cache")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--headless")
-    options.add_argument("--disable-gpu")
-    browser = webdriver.Remote(command_executor=f"http://{settings.CHROMEDRIVER_HOST}:4444", options=options)
-    browser.implicitly_wait(15)
-    browser.set_page_load_timeout(10)
-    browser.get(url)
-    html = browser.page_source
-    browser.quit()
-    return html
-
-
-class BetRadarMenuScrapper(object):
+class BetRadarMenuProvider:
     soup = None
 
     def __init__(self):

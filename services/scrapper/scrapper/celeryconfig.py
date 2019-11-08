@@ -1,15 +1,15 @@
 # config file for Celery Daemon
 from celery.schedules import crontab
-from dynaconf import settings
+from scrapper import config
 
 # default RabbitMQ broker
-BROKER_URL = settings.BROKER_URL
+BROKER_URL = config.get("BROKER_URL")
 
 # default RabbitMQ backend
-CELERY_RESULT_BACKEND = 'amqp://'
+CELERY_RESULT_BACKEND = "amqp://"
 
 # TimeZone, this should be changed
-CELERY_TIMEZONE = 'Europe/Warsaw'
+CELERY_TIMEZONE = "Europe/Warsaw"
 
 CELERY_TASK_RESULT_EXPIRES = 30
 
@@ -18,12 +18,7 @@ CELERY_TASK_RESULT_EXPIRES = 30
 # CELERY_RESULT_SERIALIZER = 'json'
 
 
-CELERYBEAT_SCHEDULE = {
-    'update-menu': {
-        'task': 'app.tasks.update_soccer_menu',
-        'schedule': crontab(minute="*/3"),
-    }
-}
+CELERYBEAT_SCHEDULE = {"update-menu": {"task": "scrapper.tasks.update_soccer_menu", "schedule": crontab(minute="*/3")}}
 
 # CELERYBEAT_SCHEDULE = {
 #     'every-minute': {

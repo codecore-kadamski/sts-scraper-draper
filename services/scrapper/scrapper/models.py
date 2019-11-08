@@ -1,14 +1,13 @@
-from enum import Enum, IntEnum
-import pydantic as pd
-from sqlalchemy.sql import func
-from pydantic import BaseModel, Json, AnyUrl
-from typing import Dict, FrozenSet, List, Optional, Sequence, Set, Tuple, Union
 from datetime import date, datetime, time, timedelta
+from enum import Enum, IntEnum
+from typing import Dict, FrozenSet, List, Optional, Sequence, Set, Tuple, Union
 
-from sqlalchemy import Column, Integer, String, DateTime, Enum
+import pydantic as pd
+from pydantic import AnyUrl, BaseModel, Json
+from scrapper.database import session
+from sqlalchemy import Column, DateTime, Enum, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from app.database import session
-
+from sqlalchemy.sql import func
 
 Base = declarative_base()
 
@@ -16,17 +15,17 @@ Base = declarative_base()
 class AutoLengthEnumField(Enum):
     def __init__(self, enum, **kwargs):
         max_length = (max(len(item.value) for item in enum) // 10 + 1) * 10
-        kwargs.setdefault('max_length', max_length)
+        kwargs.setdefault("max_length", max_length)
         super().__init__(enum, **kwargs)
 
 
 class SportTypes(IntEnum):
-    #SOCCER = (1, 'soccer', '2_1', 'Piłka Nożna')
+    # SOCCER = (1, 'soccer', '2_1', 'Piłka Nożna')
     SOCCER = 1
 
 
 class MenuOrm(Base):
-    __tablename__ = 'menu'
+    __tablename__ = "menu"
     id = Column(Integer, primary_key=True)
     sport = Column(Enum(SportTypes), default=None, nullable=True)
     continent = Column(String(), nullable=False)
@@ -58,7 +57,7 @@ class Menu(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         orm_mode = True
-    
+
     def create(self):
         data = self.dict()
         obj = MenuOrm(**data)
@@ -70,7 +69,7 @@ class Menu(BaseModel):
 
 
 class MatchOrm(Base):
-    __tablename__ = 'matches'
+    __tablename__ = "matches"
     id = Column(Integer, primary_key=True)
     sport = Column(Enum(SportTypes), default=None, nullable=True)
     continent = Column(String(), nullable=False)
@@ -112,8 +111,6 @@ class Match(BaseModel):
         session.commit()
         session.close()
         return obj
-
-
 
     # `id` INT NOT NULL AUTO_INCREMENT,
     # `league_id` INT NOT NULL,
