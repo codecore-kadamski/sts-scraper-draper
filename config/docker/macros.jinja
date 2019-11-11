@@ -14,8 +14,7 @@
 
 {% macro config_env() %}
 env_file:
-    - ./config/.env
-{% endmacro %}
+        - ./config/.env{% endmacro %}
 
 {% macro storage(domain) %}
 - MYSQL_NAME={{ domain }}{{ DB_SUFFIX }}

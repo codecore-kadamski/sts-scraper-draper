@@ -7,8 +7,7 @@ services:
         image: us.gcr.io/sts-scraper-draper/mysql-server:v0.7.0
         container_name: mysql
         env_file:
-        - ./config/.env
-
+            - ./config/.env
         environment:
             - MYSQL_ROOT_PASSWORD=root
         restart: always
@@ -28,8 +27,7 @@ services:
         image: us.gcr.io/sts-scraper-draper/redis-server:v0.5.0
         container_name: redis
         env_file:
-        - ./config/.env
-
+            - ./config/.env
         ports:
             - 6379:6379
         networks:
@@ -39,8 +37,7 @@ services:
         image: us.gcr.io/sts-scraper-draper/wdb-server:v0.2.0
         container_name: wdb
         env_file:
-        - ./config/.env
-
+            - ./config/.env
         networks:
             - default_net
         ports:
@@ -51,8 +48,7 @@ services:
         image: us.gcr.io/sts-scraper-draper/chromedriver:v1.2.0
         container_name: chromedriver
         env_file:
-        - ./config/.env
-
+            - ./config/.env
         ports:
             - 4444:4444
         networks:
@@ -62,11 +58,9 @@ services:
         image: us.gcr.io/sts-scraper-draper/scrapper:v0.7.0
         container_name: scrapper
         env_file:
-        - ./config/.env
-
+            - ./config/.env
         restart: always
         depends_on:
-            - build
             - mysql
             - redis
             - wdb
@@ -76,7 +70,6 @@ services:
         command: python scrapper/run.py
         networks:
             default_net:
-
 
 volumes:
     data_pgsql:
