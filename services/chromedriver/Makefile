@@ -1,20 +1,23 @@
 .PHONY: docs
 SHELL := /bin/bash
-SERVICE_NAME := sts_scraper_draper
-#SERVER_ROOT := c4a_smart
-#APPS := '${SERVER_ROOT}.apps.$(app)'
+PWD := $(shell pwd)
+export REPOSITORY := sts-scraper-draper
+export SERVICE_NAME := chromedriver
+export GITHUB_REGISTRY_HOST := $(shell source ../../config/.env && echo $$GITHUB_REGISTRY_HOST)
+export GITHUB_USERNAME := $(shell source ../../config/.env && echo $$GITHUB_USERNAME)
+export GITHUB_TOKEN := $(shell source ../../config/.env && echo $$GITHUB_TOKEN)
+export VERSION := $(shell sed -ne '/current_version/s/current_version = //p' < setup.cfg)
+export REGISTRY_PATH := $(GITHUB_REGISTRY_HOST)/$(GITHUB_USERNAME)/$(REPOSITORY)/$(SERVICE_NAME):$(VERSION)
+##export IMAGE_ID := $(shell docker images --filter=reference='$(GITHUB_REGISTRY_HOST)/$(GITHUB_USERNAME)/$(REPOSITORY)/*:$(VERSION)' --format "table {{.ID}} {{.Repository}} {{.Tag}}" | head -2 | tail -1 | cut -d " " -f 1)
+##export IMAGE_ID := $(shell docker images --filter=reference='$(REGISTRY_PATH)' --format "table {{.ID}} {{.Repository}} {{.Tag}}" | head -2 | tail -1 | cut -d " " -f 1)
+export IMAGE_ID := $(shell docker images --filter=reference='$(SERVICE_NAME)' --format "table {{.ID}} {{.Repository}} {{.Tag}}" | head -2 | tail -1 | cut -d " " -f 1)
 
+export GOOGLE_REGISTRY_PATH := us.gcr.io/$(REPOSITORY)
 
-WAIT := 2
 RED := \u001b[0;31m
 NC := \u001b[0m
 GREEN := \u001b[0;32m
 YELLOW := \u001b[1;33m
-
-ifneq ($(sleep),)
-	WAIT=$(sleep)
-endif
-
 
 .DEFAULT_GOAL := help
 
@@ -37,87 +40,21 @@ clean:
 	@-rm -rf build dist *.egg-info htmlcov .coverage docs/build >> /dev/null
 	@-find . -name '__pycache__' -exec rm -rf '{}' \; >> /dev/null
 
-image:  ## tworzy obraz dockera
-	docker build -t $(PROJECT_NAME):latest --rm .
+registry-logout:
+	@-docker logout $(GITHUB_REGISTRY_HOST)
 
-upload:  ## wrzuca obraz dockera do rejestru
-	./common/bin/upload_image.sh $(PROJECT_NAME)
+registry-login:
+	@-docker login $(GITHUB_REGISTRY_HOST) -u $(GITHUB_USERNAME) -p $(GITHUB_TOKEN)
 
+registry-image:  ## tworzy obraz dockera w rejestrze Github
+	@-docker build -t $(SERVICE_NAME):latest --rm .
+	##@-docker build -t $(REGISTRY_PATH) --rm .
 
-
-init-db:  #  create postgres image for docker
-	@-cd ../ && ./scripts/docker_psql.sh init
-
-start-db: #  run postgres container
-	@-cd ../ && ./scripts/docker_psql.sh
-	@-if [ ! -z $(sleep) ]; then \
-		echo -e '${GREEN}Wait ${WAIT} seconds for start postgres ... then migrations will be execute${NC}'; \
-	else \
-		echo -e '${GREEN}Run db migrations${NC}'; \
-	fi
-	@-sleep ${WAIT}
-
-start-local-server: #  start server
-	@-poetry run gunicorn -b 0.0.0.0:5000
-	poetry run gunicorn -c gunicorn_config.py wsgi
-
-start-redis:
-	@-../scripts/docker_redis.sh
-
-# start: start-redis start-db migrations init-users start-local-server ##  start local server
-
-start:  ##  start project in containers
-	@-docker-compose up -d --build --remove-orphans -t 60 ##--force-recreate
-
-stop: docker-rm  #  stop project
-	@-docker-compose stop
-	@-docker-compose down
-
-develop:  ##  poetry install requirements
-	@-poetry install -n
-
-docstyle:  ##  check docstyle
-	@-poetry run pydocstyle --ignore=D205,D211,D212,D400 ${SERVER_ROOT}
-
-codestyle:  ##  check codestyle flake8 pep8
-	@-poetry run flake8 ${SERVER_ROOT}
-
-test:  ##  runing all tests or specific test by parameter : exp. make test app=vehicles
-	@-mkdir -p reports
-	@-if [ ! -z $(app) ]; then \
-		poetry run coverage run --source=${APPS} ./manage.py test --noinput ${APPS}; \
-	else \
-		poetry run coverage run --source=${SERVER_ROOT} ./manage.py test --noinput ${SERVER_ROOT}; \
-	fi
-	@-poetry run coverage report -m --skip-covered
-	@-poetry run coverage html
-
-test-coverage:  ##  test-coverage
-	@-docker-compose up test-coverage
-
-report-html:  ##  view coverage report in browser
-	@-google-chrome htmlcov/index.html
-
-
-docker-rmi:
-	@-docker rmi -f $(docker images)
-
-docker-rm:
-	@-docker stop $(docker ps -a -q)
-	@-docker rm $(docker ps -a -q) -f
-
-build:
-	@-docker build -t scrapper -f services/scrapper/Dockerfile services/scrapper/
-
-
-init:
-	@-poetry install -n `if [ "$$RUN_MODE" = "local" ]; then echo ''; else echo '--no-dev'; fi`
-
-local-config: init ## local-config
-	@-poetry run yasha -v local.yml -o docker-compose.yml docker-compose.yml.jinja
-
-image:  ## tworzy obraz dockera
-	docker build -t $(PROJECT_NAME):latest --rm .
-
-upload:  ## wrzuca obraz dockera do rejestru
-	./common/bin/upload_image.sh $(PROJECT_NAME)
+registry-upload:  ## wrzuca obraz dockera do rejestru
+	#@-echo $(IMAGE_ID)
+	#@-echo "$(REGISTRY_PATH)"
+	#@-docker tag '$(IMAGE_ID)' $(REGISTRY_PATH) | tr '[:upper:]' '[:lower:]'
+	#@-docker tag '$(IMAGE_ID)' $(REGISTRY_PATH) | tr '[:upper:]' '[:lower:]'
+	#@-docker push $(REGISTRY_PATH) | tr '[:upper:]' '[:lower:]'
+	@-docker tag '$(IMAGE_ID)' $(GOOGLE_REGISTRY_PATH)/$(SERVICE_NAME):v$(VERSION)
+	@-docker push $(GOOGLE_REGISTRY_PATH)/$(SERVICE_NAME):v$(VERSION)
