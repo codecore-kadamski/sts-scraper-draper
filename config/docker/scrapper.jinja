@@ -6,7 +6,6 @@ scrapper:
     {{ config_env() }}
     restart: always
     depends_on:
-        - build
         - mysql
         - redis
         - wdb
