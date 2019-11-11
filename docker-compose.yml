@@ -4,7 +4,7 @@ version: '3.7'
 services:
     
     mysql:
-        image: us.gcr.io/sts-scraper-draper/mysql-server:v0.6.0
+        image: us.gcr.io/sts-scraper-draper/mysql-server:v0.7.0
         container_name: mysql
         restart: always
         ports:
@@ -24,7 +24,7 @@ services:
             test: "test -f /var/lib/mysql/loaded"
     
     redis:
-        image: us.gcr.io/sts-scraper-draper/redis-server:v0.2.0
+        image: us.gcr.io/sts-scraper-draper/redis-server:v0.5.0
         container_name: redis
         env_file:
             - ./conf/.env
@@ -34,7 +34,7 @@ services:
             - default_net
     
     wdb:
-        image: us.gcr.io/sts-scraper-draper/wdb-server:v0.1.0
+        image: us.gcr.io/sts-scraper-draper/wdb-server:v0.2.0
         container_name: wdb
         networks:
             - default_net
@@ -43,7 +43,7 @@ services:
 
     
     chromedriver:
-        image: us.gcr.io/sts-scraper-draper/chromedriver:v0.2.0
+        image: us.gcr.io/sts-scraper-draper/chromedriver:v1.2.0
         container_name: chromedriver
         env_file:
             - ./conf/.env
@@ -53,7 +53,7 @@ services:
             - default_net
     
     scrapper:
-        image: us.gcr.io/sts-scraper-draper/scrapper:v0.1.0
+        image: us.gcr.io/sts-scraper-draper/scrapper:v0.7.0
         container_name: scrapper
         restart: always
         depends_on:
