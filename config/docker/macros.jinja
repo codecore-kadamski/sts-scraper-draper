@@ -1,0 +1,25 @@
+{% macro include(name) %}{% include "config/docker/" + name + ".jinja" %}{% endmacro %}
+
+{% macro redis_configuration() %}
+- REDIS_HOST=redis
+- REDIS_PORT=6379
+- REDIS_DB=0
+{% endmacro %}
+
+{% macro common() %}
+- RUN_MODE={{ RUN_MODE }}
+- WDB_SOCKET_SERVER=wdb
+- WDB_NO_BROWSER_AUTO_OPEN=True
+{% endmacro %}
+
+{% macro domain_endpoints() %}
+- ZPR_AUTHS_DOMAIN_ENDPOINT=http://zpr-auths-domain:5000/v1/
+{% endmacro %}
+
+{% macro storage(domain) %}
+- MYSQL_NAME={{ domain }}{{ DB_SUFFIX }}
+- MYSQL_USER={{ DB_USER }}
+- MYSQL_HOST={{ DB_HOST }}
+- MYSQL_PASSWORD={{ DB_PASSWORD }}
+- MYSQL_PORT={{ DB_PORT }}
+{% endmacro %}

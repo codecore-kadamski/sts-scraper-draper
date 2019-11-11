@@ -1,0 +1,9 @@
+redis:
+    image: {{ GITHUB_REGISTRY }}/redis:alpine
+    container_name: redis
+    env_file:
+        - ./conf/.env
+    ports:
+        - 6379:6379
+    networks:
+        - default_net

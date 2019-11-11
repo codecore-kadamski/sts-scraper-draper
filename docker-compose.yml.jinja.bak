@@ -1,0 +1,66 @@
+version: '3'
+
+{% macro include_service(name) %}{% include "config/docker/" + name + ".jinja" %}{% endmacro %}
+
+services:
+    {{ include_service('mysql')|indent }}
+    {{ include_service('redis')|indent }}
+    {{ include_service('zpr-ads-domain')|indent }}
+    {{ include_service('zpr-analytics-domain')|indent }}
+    {{ include_service('zpr-articles-domain')|indent }}
+    {{ include_service('zpr-articles-domain-celery')|indent }}
+    {{ include_service('zpr-auths-domain')|indent }}
+    {{ include_service('zpr-files-domain')|indent }}
+    {{ include_service('zpr-footers-domain')|indent }}
+    {{ include_service('zpr-framework-domain')|indent }}
+    {{ include_service('zpr-framework-domain-celery')|indent }}
+    {{ include_service('zpr-galleries-domain')|indent }}
+    {{ include_service('zpr-galleries-domain-celery')|indent }}
+    {{ include_service('zpr-imports-domain')|indent }}
+    {{ include_service('zpr-issues-domain')|indent }}
+    {{ include_service('zpr-lives-domain')|indent }}
+    {{ include_service('zpr-logs-domain-celery')|indent }}
+    {{ include_service('zpr-menus-domain')|indent }}
+    {{ include_service('zpr-ratings-domain')|indent }}
+    {{ include_service('zpr-recommendations-domain')|indent }}
+    {{ include_service('zpr-recommendations-domain-celery')|indent }}
+    {{ include_service('zpr-redirects-domain')|indent }}
+    {{ include_service('zpr-seo-domain')|indent }}
+    {{ include_service('zpr-sites-domain')|indent }}
+    {{ include_service('zpr-socials-domain')|indent }}
+    {{ include_service('zpr-sponsors-domain')|indent }}
+    {{ include_service('zpr-sponsors-domain-celery')|indent }}
+    {{ include_service('zpr-teasers-domain')|indent }}
+    {{ include_service('zpr-teasers-domain-celery')|indent }}
+    {{ include_service('zpr-videos-domain')|indent }}
+    {{ include_service('zpr-videos-domain-celery')|indent }}
+    {{ include_service('zpr-collections-domain')|indent }}
+    {{ include_service('zpr-collections-domain-celery')|indent }}
+    {{ include_service('zpr-hits-domain')|indent }}
+    {{ include_service('zpr-comments-domain')|indent }}
+    {{ include_service('cms')|indent }}
+    {{ include_service('cms-nginx')|indent }}
+    {{ include_service('front')|indent }}
+    {{ include_service('front-nginx')|indent }}
+    {{ include_service('glp')|indent }}
+    {{ include_service('glp-nginx')|indent }}
+    {{ include_service('zpr-cron')|indent }}
+    {{ include_service('static')|indent }}
+    {{ include_service('wdb')|indent }}
+    {{ include_service('zipkin')|indent }}
+    {{ include_service('test')|indent }}
+
+
+{% if RUN_MODE == 'local' or FRONT.endswith('-dev') or CMS.endswith('-dev') %}
+volumes:
+    front-media-volume:
+        external: true
+    cms-media-volume:
+        external: true
+    glp-media-volume:
+        external: true
+{% endif %}
+
+networks:
+    default_net:
+# vim: ft=yaml

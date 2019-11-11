@@ -1,0 +1,10 @@
+# to przesłoni katalog projektu z użyciem volumes - FRONT: v0.2.20-dev
+# to wykorzysta lokalny obraz front:latest - FRONT: latest
+# to wykorzysta lokalny obraz front:latest i przesłoni katalog projektu FRONT: latest-dev
+DEBUG: True
+RUN_MODE: local
+#MYSQL_ROOT_PASSWORD: root
+GITHUB_REPOSITORY: 
+GITHUB_REGISTRY: docker.pkg.github.com/codecore-kadamski/sts-scraper-draper
+GITHUB_ACCOUNT: codecore-kadamski
+CHROMEDRIVER: v1.0.0

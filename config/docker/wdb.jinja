@@ -1,0 +1,10 @@
+{% if DEBUG == True %}
+wdb:
+    container_name: wdb
+    image: {{ GITHUB_REGISTRY }}/wdb-server:latest
+    networks:
+        - default_net
+    ports:
+       - "1984:1984"
+{% endif %}
+

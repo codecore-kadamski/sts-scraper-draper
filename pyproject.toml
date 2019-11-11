@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "sts-scraper-draper"
+version = "0.1.0"
+description = ""
+authors = ["Krzysztof Adamski"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+yasha = "^4.3"
+bumpversion = "^0.5.3"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

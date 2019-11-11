@@ -3,11 +3,11 @@ from __future__ import absolute_import, unicode_literals
 from celery import Celery
 
 app = Celery(
-    "fetcher",
+    namespace="scrapper",
     # broker=settings.BROKER_URL,
     # broker=f'amqp://{settings.CELERY_LOGIN}:{settings.CELERY_PASS}@{settings.CELERY_HOST}:{settings.CELERY_PORT}',
     # backend='amqp://',
-    include=["app.tasks"],
+    include=["scrapper.tasks"],
 )
 app.config_from_object("scrapper.celeryconfig")
 
@@ -16,6 +16,6 @@ app.config_from_object("scrapper.celeryconfig")
 #     CELERY_TASK_RESULT_EXPIRES=3600
 # )
 
-
-if __name__ == "__main__":
-    app.start()
+#
+# if __name__ == "__main__":
+#     app.start()

@@ -1,82 +1,123 @@
+.PHONY: docs
 SHELL := /bin/bash
-PWD := $(shell pwd)
-WORKON_HOME := "$(dirname $(poetry run which python))"
-APP_PATH := $(PWD)
-APP := chromedriver
+SERVICE_NAME := sts_scraper_draper
+#SERVER_ROOT := c4a_smart
+#APPS := '${SERVER_ROOT}.apps.$(app)'
 
+
+WAIT := 2
 RED := \u001b[0;31m
 NC := \u001b[0m
 GREEN := \u001b[0;32m
-YELLOW := \u001b[1;33m`
+YELLOW := \u001b[1;33m
 
-.PHONY: docs
-export PATH := $(WORKON_HOME)/bin:$(PATH)
-export PYTHONPATH := "$(dirname $(poetry run which python))"
-export ENV_PATH := "$(dirname $(poetry run which python))"
+ifneq ($(sleep),)
+	WAIT=$(sleep)
+endif
+
 
 .DEFAULT_GOAL := help
 
 define PRINT_HELP_PYSCRIPT
 import re, sys
-for line in sys.stdin:
-	match = re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)
-	if match:
-		target, help = match.groups()
-		print(f'${GREEN}{target :20s}${NC} ${YELLOW}{help}${NC}')
-endef
-export PRINT_HELP_PYSCRIPT
 
-export DRIVERS_PATH := $(subst services/scrapper,drivers,$(APP_PATH))
+for line in sys.stdin:
+    match = re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)
+    if match:
+        target, help = match.groups()
+        print(f'${GREEN}{target :20s}${NC} ${YELLOW}{help}${NC}')
+endef
+
+export PRINT_HELP_PYSCRIPT
 
 help:
 	@-python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-test:  ##  uruchamia testy unitest
-	@-poetry run python -m unittest
+clean:
+	@-rm -rf build dist *.egg-info htmlcov .coverage docs/build >> /dev/null
+	@-find . -name '__pycache__' -exec rm -rf '{}' \; >> /dev/null
 
-run:  ##  run poetry
-	@-poetry run python scrapper/run.py 2>&1 /dev/null || true
+image:  ## tworzy obraz dockera
+	docker build -t $(PROJECT_NAME):latest --rm .
 
-runs:  ##  runs poetry
-	@-poetry run python scrapper/run_sync.py
+upload:  ## wrzuca obraz dockera do rejestru
+	./common/bin/upload_image.sh $(PROJECT_NAME)
 
-clear:
-	@-find . -name "__pycache__" -exec rm -rf {} \; 2>/dev/null || true
-	@-find . -name "*.pyc" -exec rm -rf {} \; 2>/dev/null || true
-	@-find . -name ".pytest_cache" -exec rm -rf {} \; 2>/dev/null || true
-	@-find ../../ -name "pip-wheel-metadata" -exec rm -rf "{}" \; 2>/dev/null || true
 
-install: clear  ##  install poetry
-	@-poetry install
 
-update: clear  ##  update poetry
-	@-poetry update
+init-db:  #  create postgres image for docker
+	@-cd ../ && ./scripts/docker_psql.sh init
+
+start-db: #  run postgres container
+	@-cd ../ && ./scripts/docker_psql.sh
+	@-if [ ! -z $(sleep) ]; then \
+		echo -e '${GREEN}Wait ${WAIT} seconds for start postgres ... then migrations will be execute${NC}'; \
+	else \
+		echo -e '${GREEN}Run db migrations${NC}'; \
+	fi
+	@-sleep ${WAIT}
+
+start-local-server: #  start server
+	@-poetry run gunicorn -b 0.0.0.0:5000
+	poetry run gunicorn -c gunicorn_config.py wsgi
+
+start-redis:
+	@-../scripts/docker_redis.sh
+
+# start: start-redis start-db migrations init-users start-local-server ##  start local server
+
+start:  ##  start project in containers
+	@-docker-compose up -d --build --remove-orphans -t 60 ##--force-recreate
+
+stop: docker-rm  #  stop project
+	@-docker-compose stop
+	@-docker-compose down
 
 develop:  ##  poetry install requirements
-	@-poetry install  -n && poetry update
+	@-poetry install -n
 
-build:  ##  build image
-	@-docker build -t $(APP) -f Dockerfile .
+docstyle:  ##  check docstyle
+	@-poetry run pydocstyle --ignore=D205,D211,D212,D400 ${SERVER_ROOT}
 
-docker-run:  ##  run docker container
-# 	@echo "$(DRIVERS_PATH)"
-	@-docker run -d -it \
-	--rm \
-	--name $(APP) \
-	--port 127.0.0.1::4444
-	--env CHROMEDRIVER_WHITELISTED_IPS=''
-	$(APP):latest
+codestyle:  ##  check codestyle flake8 pep8
+	@-poetry run flake8 ${SERVER_ROOT}
+
+test:  ##  runing all tests or specific test by parameter : exp. make test app=vehicles
+	@-mkdir -p reports
+	@-if [ ! -z $(app) ]; then \
+		poetry run coverage run --source=${APPS} ./manage.py test --noinput ${APPS}; \
+	else \
+		poetry run coverage run --source=${SERVER_ROOT} ./manage.py test --noinput ${SERVER_ROOT}; \
+	fi
+	@-poetry run coverage report -m --skip-covered
+	@-poetry run coverage html
+
+test-coverage:  ##  test-coverage
+	@-docker-compose up test-coverage
+
+report-html:  ##  view coverage report in browser
+	@-google-chrome htmlcov/index.html
+
 
 docker-rmi:
 	@-docker rmi -f $(docker images)
 
 docker-rm:
 	@-docker stop $(docker ps -a -q)
-	@-docker rm $(docker ps -a -q)
+	@-docker rm $(docker ps -a -q) -f
 
-start:  ##  start project in containers
-	@-docker-compose up --build --remove-orphans -t 60 -d #--force-recreate
+build:
+	@-docker build -t scrapper -f services/scrapper/Dockerfile services/scrapper/
 
-stop: docker-rm  #  stop project
-	@-docker-compose stop
-	@-docker-compose down
+
+init:
+	@-poetry install -n `if [ "$$RUN_MODE" = "local" ]; then echo ''; else echo '--no-dev'; fi`
+
+local-config: init ## local-config
+	@-poetry run yasha -v local.yml -o docker-compose.yml docker-compose.yml.jinja
+
+image:  ## tworzy obraz dockera
+	docker build -t $(PROJECT_NAME):latest --rm .
+
+upload:  ## wrzuca obraz dockera do rejestru
+	./common/bin/upload_image.sh $(PROJECT_NAME)

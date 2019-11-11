@@ -1,6 +1,11 @@
+.PHONY: docs
 SHELL := /bin/bash
-SERVER_ROOT := c4a_smart
-APPS := '${SERVER_ROOT}.apps.$(app)'
+
+PROJECT_NAME := sts_scraper_draper
+#SERVER_ROOT := c4a_smart
+#APPS := '${SERVER_ROOT}.apps.$(app)'
+
+
 WAIT := 2
 RED := \u001b[0;31m
 NC := \u001b[0m
@@ -28,6 +33,18 @@ export PRINT_HELP_PYSCRIPT
 
 help:
 	@-python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+
+clean:
+	@-rm -rf build dist *.egg-info htmlcov .coverage docs/build >> /dev/null
+	@-find . -name '__pycache__' -exec rm -rf '{}' \; >> /dev/null
+
+image:  ## tworzy obraz dockera
+	docker build -t $(PROJECT_NAME):latest --rm .
+
+upload:  ## wrzuca obraz dockera do rejestru
+	./common/bin/upload_image.sh $(PROJECT_NAME)
+
+
 
 init-db:  #  create postgres image for docker
 	@-cd ../ && ./scripts/docker_psql.sh init
@@ -92,3 +109,16 @@ docker-rm:
 
 build:
 	@-docker build -t scrapper -f services/scrapper/Dockerfile services/scrapper/
+
+
+init:
+	@-poetry install -n `if [ "$$RUN_MODE" = "local" ]; then echo ''; else echo '--no-dev'; fi`
+
+local-config: init ## local-config
+	@-poetry run yasha -v local.yml -o docker-compose.yml docker-compose.yml.jinja
+
+image:  ## tworzy obraz dockera
+	docker build -t $(PROJECT_NAME):latest --rm .
+
+upload:  ## wrzuca obraz dockera do rejestru
+	./common/bin/upload_image.sh $(PROJECT_NAME)

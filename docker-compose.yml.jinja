@@ -1,0 +1,20 @@
+version: '3.7'
+
+{% macro include_service(name) %}{% include "config/docker/" + name + ".jinja" %}{% endmacro %}
+
+services:
+    {{ include_service('mysql')|indent }}
+    {{ include_service('redis')|indent }}
+    {{ include_service('wdb')|indent }}
+    {#{ include_service('zpr-ads-domain')|indent }#}
+
+
+{% if RUN_MODE == 'local' or RUN_MODE == 'dev' %}
+volumes:
+    data_pgsql:
+    data_mysql:
+{% endif %}
+
+networks:
+    default_net:
+# vim: ft=yaml

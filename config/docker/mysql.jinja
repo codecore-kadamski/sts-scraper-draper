@@ -1,0 +1,21 @@
+mysql:
+    container_name: mysql
+    image: mysql:5.7.17
+    restart: always
+    ports:
+        - 3306:3306
+    environment:
+        - MYSQL_ROOT_PASSWORD={{ MYSQL_ROOT_PASSWORD }}
+    env_file:
+        - ./conf/.env
+    command: --innodb-flush-method=O_DSYNC --innodb-use-native-aio=0 --log_bin=ON --server-id=master-01 --innodb_buffer_pool_size=20M
+    volumes:
+        - ./scripts/mysql:/docker-entrypoint-initdb.d
+        {% if RUN_MODE == 'local' %}
+        - ./data_mysql:/var/lib/mysql
+        {% endif %}
+    networks:
+        default_net:
+            ipv4_address: 172.23.0.2
+    healthcheck:
+        test: "test -f /var/lib/mysql/loaded"

@@ -1,1 +1,4 @@
-# __all__ = ('celeryapp',)
+from scrapper.celery import app as celery_app
+
+__all__ = ('celery_app',)
+
