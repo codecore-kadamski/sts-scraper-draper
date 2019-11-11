@@ -12,6 +12,6 @@ GCP_REGISTRY: us.gcr.io/sts-scraper-draper
 
 CHROMEDRIVER: v1.2.0
 MYSQL: v0.7.0
-REDIS: v0.5.0
+REDIS: v0.6.0
 WDB: v0.2.0
 SCRAPPER: v0.7.0
