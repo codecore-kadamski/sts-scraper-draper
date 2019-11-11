@@ -1,9 +1,10 @@
-{% from 'config/docker/macros.jinja' import redis_configuration, common, domain_image, storage with context %}
+{% from 'config/docker/macros.jinja' import redis_configuration, common, domain_image, storage, config_env with context %}
 
 {% if DEBUG == True %}
 wdb:
     {{ domain_image('wdb-server', WDB)|indent(8) }}
     container_name: wdb
+    {{ config_env() }}
     networks:
         - default_net
     ports:

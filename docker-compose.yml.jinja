@@ -9,7 +9,6 @@ services:
     {{ include_service('chromedriver')|indent }}
     {{ include_service('scrapper')|indent }}
 
-
 {% if RUN_MODE == 'local' or RUN_MODE == 'dev' %}
 volumes:
     data_pgsql:

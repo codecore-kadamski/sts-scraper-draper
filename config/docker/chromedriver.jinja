@@ -1,10 +1,9 @@
-{% from 'config/docker/macros.jinja' import redis_configuration, common, domain_image, storage with context %}
+{% from 'config/docker/macros.jinja' import redis_configuration, common, domain_image, storage, config_env with context %}
 
 chromedriver:
     {{ domain_image('chromedriver', CHROMEDRIVER)|indent(8) }}
     container_name: chromedriver
-    env_file:
-        - ./conf/.env
+    {{ config_env() }}
     ports:
         - 4444:4444
     networks:

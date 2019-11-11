@@ -1,8 +1,9 @@
-{% from 'config/docker/macros.jinja' import redis_configuration, common, domain_image, storage with context %}
+{% from 'config/docker/macros.jinja' import redis_configuration, common, domain_image, storage, config_env with context %}
 
 scrapper:
     {{ domain_image('scrapper', SCRAPPER)|indent(8) }}
     container_name: scrapper
+    {{ config_env() }}
     restart: always
     depends_on:
         - build
@@ -10,8 +11,6 @@ scrapper:
         - redis
         - wdb
         - chromedriver
-    env_file:
-        - ./conf/.env
     ports:
         - 8000:8000
     command: python scrapper/run.py

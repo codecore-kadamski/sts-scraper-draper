@@ -12,6 +12,11 @@
 - WDB_NO_BROWSER_AUTO_OPEN=True
 {% endmacro %}
 
+{% macro config_env() %}
+env_file:
+    - ./config/.env
+{% endmacro %}
+
 {% macro storage(domain) %}
 - MYSQL_NAME={{ domain }}{{ DB_SUFFIX }}
 - MYSQL_USER={{ DB_USER }}

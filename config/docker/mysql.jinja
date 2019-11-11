@@ -1,15 +1,14 @@
-{% from 'config/docker/macros.jinja' import redis_configuration, common, domain_image, storage with context %}
+{% from 'config/docker/macros.jinja' import redis_configuration, common, domain_image, storage, config_env with context %}
 
 mysql:
     {{ domain_image('mysql-server', MYSQL)|indent(8) }}
     container_name: mysql
+    {{ config_env() }}
+    environment:
+        - MYSQL_ROOT_PASSWORD={{ MYSQL_ROOT_PASSWORD }}
     restart: always
     ports:
         - 3306:3306
-    environment:
-        - MYSQL_ROOT_PASSWORD={{ MYSQL_ROOT_PASSWORD }}
-    env_file:
-        - ./conf/.env
     command: --innodb-flush-method=O_DSYNC --innodb-use-native-aio=0 --log_bin=ON --server-id=master-01 --innodb_buffer_pool_size=20M
     volumes:
         - ./scripts/mysql:/docker-entrypoint-initdb.d
