@@ -39,8 +39,10 @@ clean:
 
 init:
 
-bumpversion:
-	@-poetry run bumpversion minor --list | grep new_version
+bumpversion:  ## ustawia numer wersji
+#	@-poetry run bumpversion minor --allow-dirty --list | grep new_version
+	@-bumpversion --list minor | grep new_version | sed -r s,"^.*=",,
+	@-git push origin master --tags
 
 registry-logout:
 	@-docker logout $(GITHUB_REGISTRY_HOST)
@@ -48,10 +50,10 @@ registry-logout:
 registry-login:
 	@-docker login $(GITHUB_REGISTRY_HOST) -u $(GITHUB_USERNAME) -p $(GITHUB_TOKEN)
 
-registry-build: bumpversion  ## tworzy obraz dockera
+registry-build:  ## tworzy obraz dockera
 	@-docker build -t $(SERVICE_NAME):latest --rm .
 
-registry-upload: registry-build  ## wrzuca obraz dockera do rejestru GoogleCloud
+registry-upload:  ## wrzuca obraz dockera do rejestru GoogleCloud
 	@-docker tag '$(IMAGE_ID)' $(GOOGLE_REGISTRY_PATH)/$(SERVICE_NAME):v$$(sed -ne '/current_version/s/current_version = //p' < setup.cfg)
 	@-docker push $(GOOGLE_REGISTRY_PATH)/$(SERVICE_NAME):v$$(sed -ne '/current_version/s/current_version = //p' < setup.cfg)
 #	@-docker rmi $(SERVICE_NAME):latest

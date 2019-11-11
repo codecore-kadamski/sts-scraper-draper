@@ -1,81 +1,59 @@
+.PHONY: docs
 SHELL := /bin/bash
 PWD := $(shell pwd)
-WORKON_HOME := "$(dirname $(poetry run which python))"
-APP_PATH := $(PWD)
-APP := scrapper
+export REPOSITORY := sts-scraper-draper
+export SERVICE_NAME := scrapper
+export GITHUB_REGISTRY_HOST := $(shell source ../../config/.env && echo $$GITHUB_REGISTRY_HOST)
+export GITHUB_USERNAME := $(shell source ../../config/.env && echo $$GITHUB_USERNAME)
+export GITHUB_TOKEN := $(shell source ../../config/.env && echo $$GITHUB_TOKEN)
+#  export VERSION := $(shell sed -ne '/current_version/s/current_version = //p' < setup.cfg)
+export REGISTRY_PATH := $(GITHUB_REGISTRY_HOST)/$(GITHUB_USERNAME)/$(REPOSITORY)/$(SERVICE_NAME):$(VERSION)
+export IMAGE_ID := $(shell docker images --filter=reference='$(SERVICE_NAME)' --format "table {{.ID}} {{.Repository}} {{.Tag}}" | head -2 | tail -1 | cut -d " " -f 1)
+export GOOGLE_REGISTRY_PATH := us.gcr.io/$(REPOSITORY)
 
 RED := \u001b[0;31m
 NC := \u001b[0m
 GREEN := \u001b[0;32m
-YELLOW := \u001b[1;33m`
-
-.PHONY: docs
-export PATH := $(WORKON_HOME)/bin:$(PATH)
-export PYTHONPATH := "$(dirname $(poetry run which python))"
-export ENV_PATH := "$(dirname $(poetry run which python))"
+YELLOW := \u001b[1;33m
 
 .DEFAULT_GOAL := help
 
 define PRINT_HELP_PYSCRIPT
 import re, sys
-for line in sys.stdin:
-	match = re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)
-	if match:
-		target, help = match.groups()
-		print(f'${GREEN}{target :20s}${NC} ${YELLOW}{help}${NC}')
-endef
-export PRINT_HELP_PYSCRIPT
 
-export DRIVERS_PATH := $(subst services/scrapper,drivers,$(APP_PATH))
+for line in sys.stdin:
+    match = re.match(r'^([a-zA-Z_-]+):.*?## (.*)$$', line)
+    if match:
+        target, help = match.groups()
+        print(f'${GREEN}{target :20s}${NC} ${YELLOW}{help}${NC}')
+endef
+
+export PRINT_HELP_PYSCRIPT
 
 help:
 	@-python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
-test:  ##  uruchamia testy unitest
-	@-poetry run python -m unittest
+clean:
+	@-rm -rf build dist *.egg-info htmlcov .coverage docs/build >> /dev/null
+	@-find . -name '__pycache__' -exec rm -rf '{}' \; >> /dev/null
 
-run:  ##  run poetry
-	@-poetry run python scrapper/run.py 2>&1 /dev/null || true
+init:
 
-runs:  ##  runs poetry
-	@-poetry run python scrapper/run_sync.py
+bumpversion:  ## ustawia numer wersji
+#	@-poetry run bumpversion minor --allow-dirty --list | grep new_version
+	@-bumpversion --list minor | grep new_version | sed -r s,"^.*=",,
+	@-git push origin master --tags
 
-clear:
-	@-find . -name "__pycache__" -exec rm -rf {} \; 2>/dev/null || true
-	@-find . -name "*.pyc" -exec rm -rf {} \; 2>/dev/null || true
-	@-find . -name ".pytest_cache" -exec rm -rf {} \; 2>/dev/null || true
-	@-find ../../ -name "pip-wheel-metadata" -exec rm -rf "{}" \; 2>/dev/null || true
+registry-logout:
+	@-docker logout $(GITHUB_REGISTRY_HOST)
 
-install: clear  ##  install poetry
-	@-poetry install
+registry-login:
+	@-docker login $(GITHUB_REGISTRY_HOST) -u $(GITHUB_USERNAME) -p $(GITHUB_TOKEN)
 
-update: clear  ##  update poetry
-	@-poetry update
+registry-build:  ## tworzy obraz dockera
+	@-docker build -t $(SERVICE_NAME):latest --rm .
 
-develop:  ##  poetry install requirements
-	@-poetry install  -n && poetry update
-
-build:  ##  build image
-	@-docker build -t $(APP) -f Dockerfile .
-
-docker-run:  ##  run docker container
-# 	@echo "$(DRIVERS_PATH)"
-	@-docker run -d -it \
-	--rm \
-	--name $(APP) \
-	--mount type=bind,source="$(DRIVERS_PATH)",target="/drivers" \
-	$(APP):latest
-
-docker-rmi:
-	@-docker rmi -f $(docker images)
-
-docker-rm:
-	@-docker stop $(docker ps -a -q)
-	@-docker rm $(docker ps -a -q)
-
-start:  ##  start project in containers
-	@-docker-compose up --build --remove-orphans -t 60 -d #--force-recreate
-
-stop: docker-rm  #  stop project
-	@-docker-compose stop
-	@-docker-compose down
+registry-upload:  ## wrzuca obraz dockera do rejestru GoogleCloud
+	@-docker tag '$(IMAGE_ID)' $(GOOGLE_REGISTRY_PATH)/$(SERVICE_NAME):v$$(sed -ne '/current_version/s/current_version = //p' < setup.cfg)
+	@-docker push $(GOOGLE_REGISTRY_PATH)/$(SERVICE_NAME):v$$(sed -ne '/current_version/s/current_version = //p' < setup.cfg)
+#	@-docker rmi $(SERVICE_NAME):latest

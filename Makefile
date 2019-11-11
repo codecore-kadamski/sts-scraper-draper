@@ -114,11 +114,11 @@ build:
 init:
 	@-poetry install -n `if [ "$$RUN_MODE" = "local" ]; then echo ''; else echo '--no-dev'; fi`
 
-local-config: init ## local-config
+local-config: ## local-config
 	@-poetry run yasha -v local.yml -o docker-compose.yml docker-compose.yml.jinja
 
-image:  ## tworzy obraz dockera
-	docker build -t $(PROJECT_NAME):latest --rm .
+# image:  ## tworzy obraz dockera
+# 	docker build -t $(PROJECT_NAME):latest --rm .
 
-upload:  ## wrzuca obraz dockera do rejestru
-	./common/bin/upload_image.sh $(PROJECT_NAME)
+# upload:  ## wrzuca obraz dockera do rejestru
+# 	./common/bin/upload_image.sh $(PROJECT_NAME)

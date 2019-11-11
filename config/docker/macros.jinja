@@ -12,14 +12,15 @@
 - WDB_NO_BROWSER_AUTO_OPEN=True
 {% endmacro %}
 
-{% macro domain_endpoints() %}
-- ZPR_AUTHS_DOMAIN_ENDPOINT=http://zpr-auths-domain:5000/v1/
-{% endmacro %}
-
 {% macro storage(domain) %}
 - MYSQL_NAME={{ domain }}{{ DB_SUFFIX }}
 - MYSQL_USER={{ DB_USER }}
 - MYSQL_HOST={{ DB_HOST }}
 - MYSQL_PASSWORD={{ DB_PASSWORD }}
 - MYSQL_PORT={{ DB_PORT }}
+{% endmacro %}
+
+{% macro domain_image(project, version) %}
+image: {% if version.startswith('latest') %}{{ project }}:latest
+{% else %}{{ GCP_REGISTRY }}/{{ project }}:{{ version.rstrip('-dev') }}{% endif %}
 {% endmacro %}

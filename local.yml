@@ -3,8 +3,15 @@
 # to wykorzysta lokalny obraz front:latest i przesłoni katalog projektu FRONT: latest-dev
 DEBUG: True
 RUN_MODE: local
-#MYSQL_ROOT_PASSWORD: root
+MYSQL_ROOT_PASSWORD: root
 GITHUB_REPOSITORY: 
 GITHUB_REGISTRY: docker.pkg.github.com/codecore-kadamski/sts-scraper-draper
 GITHUB_ACCOUNT: codecore-kadamski
-CHROMEDRIVER: v1.0.0
+
+GCP_REGISTRY: us.gcr.io/sts-scraper-draper
+
+CHROMEDRIVER: v1.2.0
+MYSQL: v0.7.0
+REDIS: v0.5.0
+WDB: v0.2.0
+SCRAPPER: v0.7.0

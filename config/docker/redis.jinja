@@ -1,5 +1,7 @@
+{% from 'config/docker/macros.jinja' import redis_configuration, common, domain_image, storage with context %}
+
 redis:
-    image: {{ GITHUB_REGISTRY }}/redis:alpine
+    {{ domain_image('redis-server', REDIS)|indent(8) }}
     container_name: redis
     env_file:
         - ./conf/.env

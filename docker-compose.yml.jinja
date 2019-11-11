@@ -6,7 +6,8 @@ services:
     {{ include_service('mysql')|indent }}
     {{ include_service('redis')|indent }}
     {{ include_service('wdb')|indent }}
-    {#{ include_service('zpr-ads-domain')|indent }#}
+    {{ include_service('chromedriver')|indent }}
+    {{ include_service('scrapper')|indent }}
 
 
 {% if RUN_MODE == 'local' or RUN_MODE == 'dev' %}

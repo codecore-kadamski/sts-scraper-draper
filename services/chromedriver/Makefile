@@ -6,12 +6,9 @@ export SERVICE_NAME := chromedriver
 export GITHUB_REGISTRY_HOST := $(shell source ../../config/.env && echo $$GITHUB_REGISTRY_HOST)
 export GITHUB_USERNAME := $(shell source ../../config/.env && echo $$GITHUB_USERNAME)
 export GITHUB_TOKEN := $(shell source ../../config/.env && echo $$GITHUB_TOKEN)
-export VERSION := $(shell sed -ne '/current_version/s/current_version = //p' < setup.cfg)
+#  export VERSION := $(shell sed -ne '/current_version/s/current_version = //p' < setup.cfg)
 export REGISTRY_PATH := $(GITHUB_REGISTRY_HOST)/$(GITHUB_USERNAME)/$(REPOSITORY)/$(SERVICE_NAME):$(VERSION)
-##export IMAGE_ID := $(shell docker images --filter=reference='$(GITHUB_REGISTRY_HOST)/$(GITHUB_USERNAME)/$(REPOSITORY)/*:$(VERSION)' --format "table {{.ID}} {{.Repository}} {{.Tag}}" | head -2 | tail -1 | cut -d " " -f 1)
-##export IMAGE_ID := $(shell docker images --filter=reference='$(REGISTRY_PATH)' --format "table {{.ID}} {{.Repository}} {{.Tag}}" | head -2 | tail -1 | cut -d " " -f 1)
 export IMAGE_ID := $(shell docker images --filter=reference='$(SERVICE_NAME)' --format "table {{.ID}} {{.Repository}} {{.Tag}}" | head -2 | tail -1 | cut -d " " -f 1)
-
 export GOOGLE_REGISTRY_PATH := us.gcr.io/$(REPOSITORY)
 
 RED := \u001b[0;31m
@@ -40,21 +37,23 @@ clean:
 	@-rm -rf build dist *.egg-info htmlcov .coverage docs/build >> /dev/null
 	@-find . -name '__pycache__' -exec rm -rf '{}' \; >> /dev/null
 
+init:
+
+bumpversion:  ## ustawia numer wersji
+#	@-poetry run bumpversion minor --allow-dirty --list | grep new_version
+	@-bumpversion --list minor | grep new_version | sed -r s,"^.*=",,
+	@-git push origin master --tags
+
 registry-logout:
 	@-docker logout $(GITHUB_REGISTRY_HOST)
 
 registry-login:
 	@-docker login $(GITHUB_REGISTRY_HOST) -u $(GITHUB_USERNAME) -p $(GITHUB_TOKEN)
 
-registry-image:  ## tworzy obraz dockera w rejestrze Github
+registry-build:  ## tworzy obraz dockera
 	@-docker build -t $(SERVICE_NAME):latest --rm .
-	##@-docker build -t $(REGISTRY_PATH) --rm .
 
-registry-upload:  ## wrzuca obraz dockera do rejestru
-	#@-echo $(IMAGE_ID)
-	#@-echo "$(REGISTRY_PATH)"
-	#@-docker tag '$(IMAGE_ID)' $(REGISTRY_PATH) | tr '[:upper:]' '[:lower:]'
-	#@-docker tag '$(IMAGE_ID)' $(REGISTRY_PATH) | tr '[:upper:]' '[:lower:]'
-	#@-docker push $(REGISTRY_PATH) | tr '[:upper:]' '[:lower:]'
-	@-docker tag '$(IMAGE_ID)' $(GOOGLE_REGISTRY_PATH)/$(SERVICE_NAME):v$(VERSION)
-	@-docker push $(GOOGLE_REGISTRY_PATH)/$(SERVICE_NAME):v$(VERSION)
+registry-upload:  ## wrzuca obraz dockera do rejestru GoogleCloud
+	@-docker tag '$(IMAGE_ID)' $(GOOGLE_REGISTRY_PATH)/$(SERVICE_NAME):v$$(sed -ne '/current_version/s/current_version = //p' < setup.cfg)
+	@-docker push $(GOOGLE_REGISTRY_PATH)/$(SERVICE_NAME):v$$(sed -ne '/current_version/s/current_version = //p' < setup.cfg)
+#	@-docker rmi $(SERVICE_NAME):latest

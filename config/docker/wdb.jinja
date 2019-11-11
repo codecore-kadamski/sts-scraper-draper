@@ -1,10 +1,11 @@
+{% from 'config/docker/macros.jinja' import redis_configuration, common, domain_image, storage with context %}
+
 {% if DEBUG == True %}
 wdb:
+    {{ domain_image('wdb-server', WDB)|indent(8) }}
     container_name: wdb
-    image: {{ GITHUB_REGISTRY }}/wdb-server:latest
     networks:
         - default_net
     ports:
        - "1984:1984"
 {% endif %}
-

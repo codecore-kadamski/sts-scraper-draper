@@ -1,6 +1,8 @@
+{% from 'config/docker/macros.jinja' import redis_configuration, common, domain_image, storage with context %}
+
 mysql:
+    {{ domain_image('mysql-server', MYSQL)|indent(8) }}
     container_name: mysql
-    image: mysql:5.7.17
     restart: always
     ports:
         - 3306:3306
