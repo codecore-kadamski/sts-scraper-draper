@@ -24,9 +24,9 @@ line_length=128
 
 [tool.poetry]
 name = "scrapper"
-version = "0.7.0"
+version = "0.8.0"
 description = ""
-authors = ["kadam <kadam@softserveinc.com>"]
+authors = ["Krzysztof Adamski"]
 
 [tool.poetry.dependencies]
 python = "^3.6"
@@ -40,12 +40,13 @@ pydantic = "^1.0"
 sqlalchemy = "^1.3"
 pyMySQL = "^0.9.3"
 kombu = "4.6.3"
+flower = "^0.9.3"
+pip = "^19.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
 ipython = "^7.8"
 ipdb = "^0.12.2"
-flower = "^0.9.3"
 wdb = "^3.3"
 
 [build-system]

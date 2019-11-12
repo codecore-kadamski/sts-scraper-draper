@@ -1,5 +1,4 @@
 from __future__ import absolute_import, unicode_literals
-
 from celery import Celery
 
 app = Celery(
@@ -10,12 +9,11 @@ app = Celery(
     include=["scrapper.tasks"],
 )
 app.config_from_object("scrapper.celeryconfig")
+app.conf.update(
+    result_expires=3600,
+    CELERY_TASK_RESULT_EXPIRES=3600
+)
 
-# app.conf.update(
-#     result_expires=3600,
-#     CELERY_TASK_RESULT_EXPIRES=3600
-# )
 
-#
-# if __name__ == "__main__":
-#     app.start()
+if __name__ == "__main__":
+    app.start()

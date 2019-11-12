@@ -35,8 +35,8 @@ def run_matches_scrapper():
 
 def main():
     parser = OptionParser()
-    parser.add_option("--menu", dest="menu", help="scraping menu", nargs=0, type="string")
-    parser.add_option("--matches", dest="matches", help="scraping matches", nargs=0, type="string")
+    parser.add_option("--menu", action="store_true", dest="menu", help="scraping menu")
+    parser.add_option("--matches", action="store_true", dest="matches", help="scraping matches")
 
     (options, args) = parser.parse_args()
     menu = options.menu if hasattr(options, "menu") else None

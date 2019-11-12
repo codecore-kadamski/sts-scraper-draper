@@ -1,7 +1,6 @@
 from __future__ import absolute_import, unicode_literals
-
 from pydantic import BaseModel, ValidationError, validator
-from scrapper.celery import app
+from scrapper.worker import app
 from scrapper.models import Menu, MenuOrm, SportTypes
 
 

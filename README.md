@@ -20,3 +20,7 @@ Docker Registry
 docker login docker.pkg.github.com -u codecore-kadamski -p 4dd929a0e888c7a3c544ca2de0581262d46fd269
 
 docker login docker.pkg.github.com -u codecore-kadamski --password-stdin 4dd929a0e888c7a3c544ca2de0581262d46fd269
+
+
+poetry cache:clear pypy --all
+

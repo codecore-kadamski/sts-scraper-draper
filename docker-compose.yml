@@ -24,7 +24,7 @@ services:
             test: "test -f /var/lib/mysql/loaded"
     
     redis:
-        image: us.gcr.io/sts-scraper-draper/redis-server:v0.5.0
+        image: us.gcr.io/sts-scraper-draper/redis-server:v0.6.0
         container_name: redis
         env_file:
             - ./config/.env
@@ -54,8 +54,21 @@ services:
         networks:
             - default_net
     
+    flower:
+        image: us.gcr.io/sts-scraper-draper/scrapper:v0.8.0
+        container_name: flower
+        env_file:
+            - ./config/.env
+        restart: always
+        ports:
+            - "5555:5555"
+        command: celery flower -A scrapper.scrapper --port=5555 --broker=redis://redis:6379/0 -l info
+        networks:
+            default_net:
+                ipv4_address: 172.23.0.15
+    
     scrapper:
-        image: us.gcr.io/sts-scraper-draper/scrapper:v0.7.0
+        image: us.gcr.io/sts-scraper-draper/scrapper:v0.8.0
         container_name: scrapper
         env_file:
             - ./config/.env
@@ -65,11 +78,13 @@ services:
             - redis
             - wdb
             - chromedriver
+            - flower
         ports:
             - 8000:8000
         command: python scrapper/run.py
         networks:
             default_net:
+
 
 volumes:
     data_pgsql:
@@ -77,4 +92,9 @@ volumes:
 
 networks:
     default_net:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 172.23.0.0/16
+
 # vim: ft=yaml
